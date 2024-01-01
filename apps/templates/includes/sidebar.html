@@ -44,9 +44,9 @@
                     </a>
                 </li>
                 <li class="{% if 'tables' in segment %} active {% endif %}">
-                    <a href="/tables.html">
+                    <a href="{% url 'populate' %}">
                         <i class="tim-icons icon-puzzle-10"></i>
-                        <p>Table List</p>
+                        <p>Populate Database</p>
                     </a>
                 </li>
                 <li class="{% if 'typography' in segment %} active {% endif %}">

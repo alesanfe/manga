@@ -1,0 +1,54 @@
+[
+  {
+    "model": "auth.User",
+    "pk": 1,
+    "fields": {
+      "username": "admin",
+      "first_name": "Admin",
+      "last_name": "Admin",
+      "password": "pbkdf2_sha256$600000$S93S48JgQbretiPEosZjJz$w/9J9xCOsg5HaAYSswkDFWMKPAd205KnY8VFv57tW4k=",
+      "is_active": true,
+      "is_staff": true,
+      "is_superuser": true
+    }
+  },
+  {
+    "model": "auth.User",
+    "pk": 2,
+    "fields": {
+      "username": "user",
+      "first_name": "User",
+      "last_name": "User",
+      "password": "pbkdf2_sha256$600000$uZ8FOsS3r5ClmUAVoms0AS$+bB5gLK6UlcHE9rLxc8HLKy1F2V3tnHky1SflZlAZbI=",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false
+    }
+  },
+  {
+    "model": "auth.User",
+    "pk": 3,
+    "fields": {
+      "username": "guest",
+      "first_name": "Guest",
+      "last_name": "Guest",
+      "password": "pbkdf2_sha256$600000$iCoBEkYPqWIIbe175xGhjv$7jFQAO0G8TFFG7wnPRG73BWkAleSb3ICEme61prbKNY=",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false
+    }
+  },
+  {
+    "model": "auth.User",
+    "pk": 4,
+    "fields": {
+      "username": "test",
+      "first_name": "Test",
+      "last_name": "Test",
+      "password": "pbkdf2_sha256$600000$KDeVPMxY1MqRQdHnd3bINf$xx/GTohgHaw2mCIt1jaZTtR2IQkCphounWaUjYQTe28=",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false
+    }
+  }
+]

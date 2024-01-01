@@ -33,13 +33,16 @@ CSRF_TRUSTED_ORIGINS = ['http://localhost:85', 'http://127.0.0.1', 'https://' + 
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
+    'material',
+    'material.admin',
+    # 'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'apps.home'  # Enable the inner home (home)
+    'apps.home',  # Enable the inner home (home)
+    'apps.manga'
 ]
 
 MIDDLEWARE = [
@@ -83,13 +86,24 @@ WSGI_APPLICATION = 'core.wsgi.application'
 if os.environ.get('DB_ENGINE') and os.environ.get('DB_ENGINE') == "mysql":
     DATABASES = { 
       'default': {
-        'ENGINE'  : 'django.db.backends.mysql', 
-        'NAME'    : os.getenv('DB_NAME'     , 'appseed_db'),
-        'USER'    : os.getenv('DB_USERNAME' , 'appseed_db_usr'),
-        'PASSWORD': os.getenv('DB_PASS'     , 'pass'),
-        'HOST'    : os.getenv('DB_HOST'     , 'localhost'),
-        'PORT'    : os.getenv('DB_PORT'     , 3306),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('DB_NAME', 'appseed_db'),
+        'USER': os.getenv('DB_USERNAME', 'appseed_db_usr'),
+        'PASSWORD': os.getenv('DB_PASS', 'pass'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', 3306),
         }, 
+    }
+elif os.environ.get('DB_ENGINE') and os.environ.get('DB_ENGINE') == "postgres":
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DB_NAME', 'appseed_db'),
+            'USER': os.getenv('DB_USERNAME', 'appseed_db_usr'),
+            'PASSWORD': os.getenv('DB_PASS', 'pass'),
+            'HOST': os.getenv('DB_HOST', 'localhost'),
+            'PORT': os.getenv('DB_PORT', 5432),
+        }
     }
 else:
     DATABASES = {
@@ -145,4 +159,7 @@ STATICFILES_DIRS = (
 
 
 #############################################################
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 #############################################################
