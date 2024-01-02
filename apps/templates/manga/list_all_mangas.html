@@ -1,0 +1,83 @@
+{% extends "layouts/base.html" %}
+
+{% block stylesheets %}
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .manga-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .pagination {
+            display: flex;
+            flex-direction: column;  /* Cambiado de row a column */
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .pagination div {
+            margin: 5px 0;  /* Añadido margen para separar cada div */
+        }
+
+        .pagination a {
+            padding: 10px;
+            text-decoration: none;
+            background-color: #343a40;
+            color: #fff;
+            border-radius: 5px;
+        }
+
+        .pagination a:hover {
+            background-color: #000;
+        }
+    </style>
+{% endblock stylesheets %}
+
+{% block content %}
+    <div class="content">
+        <h1>All Mangas</h1>
+        <div class="manga-container">
+            {% for manga in mangas %}
+                {% include "manga/manga_card.html" with manga=manga %}
+            {% endfor %}
+        </div>
+
+        <div class="pagination">
+            <div>
+                <span>Página {{ mangas.number }} de {{ mangas.paginator.num_pages }}.</span>
+            </div>
+            <div>
+                {% if mangas.has_previous %}
+                    <a href="?page=1">&laquo; primera</a>
+                    <a href="?page={{ mangas.previous_page_number }}">anterior</a>
+                {% endif %}
+
+                {% for page_num in mangas.paginator.page_range %}
+                    {% if page_num > mangas.number and page_num <= mangas.number|add:5 %}
+                        <a href="?page={{ page_num }}">{{ page_num }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if mangas.has_next %}
+                    <a href="?page={{ mangas.next_page_number }}">siguiente</a>
+                    <a href="?page={{ mangas.paginator.num_pages }}">última &raquo;</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+
+

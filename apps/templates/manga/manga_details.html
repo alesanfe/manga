@@ -1,0 +1,126 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} {{ manga.title }} {% endblock %}
+
+{% block stylesheets %}
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #343a40;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container2 {
+            display: flex;
+            width: 70%;
+            margin: 20px auto;
+            margin-top: 5rem;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 0.8rem;
+            overflow: hidden;
+            box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
+        }
+
+        .left-half {
+            flex: 1;
+            padding: 1.5rem;
+            border-right: 1px solid #ddd;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .left-half img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 0.8rem;
+            box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.1);
+            object-fit: contain; /* Ajusta la imagen dentro del contenedor sin cambiar su proporción */
+        }
+
+        .right-half {
+            flex: 1;
+            padding: 1.5rem;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        strong {
+            color: #444aa0;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .attribute {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+            color: #000; /* Cambia el color del texto de .attribute a rojo */
+        }
+
+        .criteria-box {
+            display: inline-block;
+            padding: 0.5rem 0.7rem;
+            margin: 0 0.3rem 0.3rem 0;
+            background-color: #343a40;
+            color: white;
+            border-radius: 0.2rem;
+            transition: background-color 0.3s ease; /* Agregado efecto de transición */
+        }
+
+        .criteria-box:hover {
+            background-color: #000; /* Color de fondo al pasar el ratón sobre el elemento */
+        }
+        
+        img.details-image {
+            width: 40%; /* Ajusta el ancho de la imagen al 100% del contenedor */
+            height: auto; /* Ajusta la altura de la imagen automáticamente según el ancho especificado */
+            border-radius: 0.8rem;
+            margin-bottom: 1rem;
+            object-fit: cover; /* Evita que la imagen se deforme y la ajusta al contenedor */
+        }
+    </style>
+{% endblock stylesheets %}
+
+{% block content %}
+    <div class="container2">
+        <div class="left-half">
+            <img src="{{ ASSETS_ROOT }}/{{ manga.image_link }}" alt="Imagen Base" class="details-image">
+        </div>
+        <div class="right-half">
+            <h1>{{ manga.title }}</h1>
+            <p class="attribute"><span style="font-size: 1.5rem;">{{ manga.views }} views</span></p>
+            <p class="attribute"><strong>Num chapters:</strong> {{ manga.num_caps }}</p>
+            <p class="attribute"><strong>Author:</strong> {{ manga.author.name }}</p>
+            {% if manga.release_year %}
+                <p class="attribute"><strong>Release year:</strong> {{ manga.release_year }}</p>
+            {% endif %}
+
+            <p class="attribute"><strong>Etiquetas:</strong>
+                {% for genre in manga.genres.all %}
+                    <span class="criteria-box">{{ genre.name }}</span>
+                {% endfor %}
+            </p>
+            {% include "manga/expand_text.html" with title="Descripción" description="Firulais" %}
+        </div>
+    </div>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE -->
+{% block javascripts %}{% endblock javascripts %}
+
+
+
+
+

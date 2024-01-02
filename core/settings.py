@@ -4,6 +4,7 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 import os, environ
+import uuid
 
 env = environ.Env(
     # set casting, default value
@@ -161,5 +162,10 @@ STATICFILES_DIRS = (
 #############################################################
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+DEFAULT_AUTO_FIELD_ADDITIONAL_OPTIONS = {
+    'default': uuid.uuid4,
+    'editable': False,
+    'unique': True,
+}
 
 #############################################################

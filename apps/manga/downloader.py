@@ -142,6 +142,7 @@ def create_pdf(images: list, pdf_filename: str) -> None:
     Parameters:
         images (list): A list of strings representing the URLs of the images to include in the PDF.
         pdf_filename (str): The filename of the PDF file to create.
+
     Returns:
         None
 

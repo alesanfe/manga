@@ -1,8 +1,11 @@
 import logging
+import os
+from io import BytesIO
 
 import requests
 from bs4 import BeautifulSoup
 from django.db import transaction
+from selenium.webdriver.chrome import webdriver
 
 from apps.manga.models import Author, Genre, Manga
 
@@ -19,6 +22,10 @@ def clean_database():
     Author.objects.all().delete()
     Genre.objects.all().delete()
     Manga.objects.all().delete()
+    for file in os.listdir('apps/static/assets/img'):
+        if file.startswith('Manga -'):
+            os.remove(os.path.join('apps/static/assets/img', file))
+
 
 
 def create_unknown_author():
@@ -181,6 +188,14 @@ def process_manga(manga, all_authors, all_genres, unknown_author, unknown_genre,
     title = manga.find('a', class_='bookname').text
     details_link = manga.find('a', class_='bookname')['href']
     image_link = manga.find('img')['src']
+    image_content = BytesIO(requests.get(image_link).content)
+    save_title = title.replace('/', '_')
+    file = f'apps/static/assets/img/Manga - {save_title}.png'
+    # Guarda la imagen como png en la carpeta data
+    with open(file, 'wb') as f:
+        f.write(image_content.getvalue())
+
+
     views = int(manga.find('span').text.replace('views', '').replace(',', '').strip())
 
     details_response = session.get(details_link + "?waring=1")
@@ -199,7 +214,7 @@ def process_manga(manga, all_authors, all_genres, unknown_author, unknown_genre,
     author = get_or_create_author(name_author, all_authors, unknown_author)
     genres = get_or_create_genres(names_genres, all_genres, unknown_genre)
 
-    create_and_save_manga(title, author, release_year, image_link, details_link, num_caps, views, genres)
+    create_and_save_manga(title, author, release_year, file.replace('apps/static/assets/', ''), details_link, num_caps, views, genres)
 
 
 

@@ -1,0 +1,84 @@
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        li.catalog-item {
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 0.8rem;
+            margin: 0.5rem; /* Reducido el margen para dar un aspecto más compacto */
+            padding: 1rem; /* Reducido el padding para dar un aspecto más compacto */
+            width: 20rem; /* Ajusta el ancho del elemento según tu preferencia */
+            text-align: center;
+            list-style-type: none;
+            transition: transform 0.3s ease; /* Agregado un efecto de transición al elemento */
+        }
+
+        li.catalog-item:hover {
+            transform: translateY(-5px); /* Efecto de elevación al pasar el ratón sobre el elemento */
+        }
+
+        img.catalog-image {
+            width: 100%; /* Ajusta el ancho de la imagen al 100% del contenedor */
+            height: auto; /* Ajusta la altura de la imagen automáticamente según el ancho especificado */
+            border-radius: 0.8rem;
+            margin-bottom: 1rem;
+            object-fit: cover; /* Evita que la imagen se deforme y la ajusta al contenedor */
+        }
+
+        h2.catalog-title {
+            color: #444aa0;
+            font-size: 1.6rem; /* Ajusta el tamaño de la fuente según tu preferencia */
+            margin-bottom: 1rem; /* Agregado un espacio inferior para separar el título de la imagen */
+        }
+
+        p.catalog-description {
+            color: #555;
+            font-size: 1rem; /* Ajusta el tamaño de la fuente según tu preferencia */
+            margin-bottom: 0.5rem; /* Agregado un espacio inferior para separar la descripción del título */
+        }
+
+        p.catalog-price {
+            color: #333;
+            font-size: 1.2rem; /* Ajusta el tamaño de la fuente según tu preferencia */
+            margin-bottom: 1rem; /* Agregado un espacio inferior para separar el precio de la descripción */
+        }
+
+        a.catalog-link {
+            display: inline-block;
+            padding: 0.8rem 1.6rem;
+            background-color: #343a40;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 0.4rem;
+            transition: background-color 0.3s ease;
+            margin-top: 1rem; /* Espacio entre el precio y el enlace */
+        }
+
+        a.catalog-link:hover {
+            background-color: #000000;
+        }
+    </style>
+{% endblock stylesheets %}
+
+{% block content %}
+    <li class="catalog-item">
+        <h2 class="catalog-title">{{ manga.title }}</h2>
+        <img src="{{ ASSETS_ROOT }}/{{ manga.image_link }}" alt="Imagen Base" class="catalog-image">
+        <p class="catalog-description">Num chapters: {{ manga.num_caps }}</p>
+        <p class="catalog-price">{{ manga.views }} views</p>
+        <a href="{% url 'find_manga' manga.pk %}"  class="catalog-link">Ver más</a>
+    </li>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}
+
+
+
