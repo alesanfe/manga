@@ -2,7 +2,7 @@ import logging
 import os
 from contextlib import closing
 
-from whoosh.fields import Schema, TEXT, NUMERIC
+from whoosh.fields import Schema, TEXT, NUMERIC, KEYWORD
 from whoosh.index import create_in
 from whoosh.writing import AsyncWriter
 
@@ -16,8 +16,9 @@ manga_schema = Schema(
     title=TEXT(stored=True),
     author_name=TEXT(stored=True),
     release_year=NUMERIC(stored=True),
-    genres=TEXT(stored=True),
+    genres=KEYWORD(stored=True, commas=True),
 )
+
 
 def create_whoosh_index(index_path=INDEX_PATH):
     """
@@ -32,6 +33,7 @@ def create_whoosh_index(index_path=INDEX_PATH):
     if not os.path.exists(index_path):
         os.makedirs(index_path)
     return create_in(index_path, manga_schema)
+
 
 def index_manga(writer, manga):
     """
@@ -55,6 +57,7 @@ def index_manga(writer, manga):
     except Exception as e:
         logging.error(f"Error indexing {manga.title}: {e}")
 
+
 def index_all_mangas(index_path=INDEX_PATH):
     """
     Index all manga information from the database into the Whoosh index.
@@ -65,21 +68,18 @@ def index_all_mangas(index_path=INDEX_PATH):
     Returns:
         None
     """
-    with closing(create_whoosh_index(index_path)) as ix:
-        with AsyncWriter(ix) as writer:
-            try:
-                # Obtain all manga from the database
-                mangas = Manga.objects.all()
+    ix = create_whoosh_index(index_path)
+    writer = ix.writer()
+    try:
+        # Obtain all manga from the database
+        mangas = Manga.objects.all()
 
-                for manga in mangas:
-                    index_manga(writer, manga)
+        for manga in mangas:
+            index_manga(writer, manga)
 
-                # Commit at the end of indexing
-                writer.commit()
-            except Exception as e:
-                logging.error(f"Error during indexing: {e}")
-
-
-
-
-
+        # Commit at the end of indexing
+        writer.commit()
+    except Exception as e:
+        logging.error(f"Error during indexing: {e}")
+    finally:
+        ix.close()

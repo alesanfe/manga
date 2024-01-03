@@ -1,60 +1,108 @@
 {% extends "layouts/base.html" %}
 
-{% block title %} User Profile {% endblock %} 
+{% block title %} User Profile {% endblock %}
 
-<!-- Specific Page CSS goes HERE  -->
-{% block stylesheets %}{% endblock stylesheets %}
+{% block stylesheets %}
+    {{ block.super }}
+    <style>
+        .errorlist {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .error-item {
+            color: red;
+            margin-bottom: 5px;
+        }
+    </style>
+{% endblock stylesheets %}
 
 {% block content %}
-
-  <div class="content">
-    <div class="row">
-      <div class="col-md-8">
-        <div class="card">
-          <div class="card-header">
-            <h5 class="title">Edit Profile</h5>
-          </div>
-          <div class="card-body">
-            <form method="post">
-              <div class="row">
-                <div class="col-md-3 px-md-1">
-                  <div class="form-group">
-                    <label for="{{ form.username.id_for_label }}">Username</label>
-                    <input type="text" class="form-control" placeholder="Username" value="{{ user.username }}">
-                  </div>
+    <div class="content">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="title">Edit Profile</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="{% url 'edit' %}">
+                            {% csrf_token %}
+                            <h6 class="card-category">
+                                {% if msg %}
+                                    <span class="text-danger">{{ msg | safe }}</span>
+                                {% endif %}
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-3 px-md-1">
+                                    <div class="form-group">
+                                        <label for="{{ form.username.id_for_label }}">Username</label>
+                                        <input type="text" class="form-control" placeholder="Username" name="username" value="{{ user.username }}">
+                                        {% if form.username.errors %}
+                                            <ul class="errorlist">
+                                                {% for error in form.username.errors %}
+                                                    <li class="error-item">{{ error }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-4 pl-md-1">
+                                    <div class="form-group">
+                                        <label for="{{ form.email.id_for_label }}">Email address</label>
+                                        <input type="email" class="form-control" placeholder="Email" name="email" value="{{ user.email }}">
+                                        {% if form.email.errors %}
+                                            <ul class="errorlist">
+                                                {% for error in form.email.errors %}
+                                                    <li class="error-item">{{ error }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 pr-md-1">
+                                    <div class="form-group">
+                                        <label for="{{ form.first_name.id_for_label }}">First Name</label>
+                                        <input type="text" class="form-control" placeholder="First Name" name="first_name" value="{{ user.first_name }}">
+                                        {% if form.first_name.errors %}
+                                            <ul class="errorlist">
+                                                {% for error in form.first_name.errors %}
+                                                    <li class="error-item">{{ error }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 pl-md-1">
+                                    <div class="form-group">
+                                        <label for="{{ form.last_name.id_for_label }}">Last Name</label>
+                                        <input type="text" class="form-control" placeholder="Last Name" name="last_name" value="{{ user.last_name }}">
+                                        {% if form.last_name.errors %}
+                                            <ul class="errorlist">
+                                                {% for error in form.last_name.errors %}
+                                                    <li class="error-item">{{ error }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-fill btn-primary">Save</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div class="col-md-4 pl-md-1">
-                  <div class="form-group">
-                    <label for="{{ form.email.id_for_label }}">Email address</label>
-                    <input type="email" class="form-control" placeholder="{{ user.email }}">
-                  </div>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-md-6 pr-md-1">
-                  <div class="form-group">
-                    <label for="{{ form.first_name.id_for_label }}">First Name</label>
-                    <input type="text" class="form-control" placeholder="Company" value="{{ user.first_name }}">
-                  </div>
-                </div>
-                <div class="col-md-6 pl-md-1">
-                  <div class="form-group">
-                    <label for="{{ form.last_name.id_for_label }}">Last Name</label>
-                    <input type="text" class="form-control" placeholder="Last Name" value="{{ user.last_name }}">
-                  </div>
-                </div>
-              </div>
-            </form>
-          </div>
-          <div class="card-footer">
-            <button type="submit" class="btn btn-fill btn-primary">Save</button>
-          </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
-
 {% endblock content %}
 
-<!-- Specific Page JS goes HERE  -->
-{% block javascripts %}{% endblock javascripts %}
+{% block javascripts %}
+    {{ block.super }}
+    {# Add your specific JavaScript code here if needed #}
+{% endblock javascripts %}
+

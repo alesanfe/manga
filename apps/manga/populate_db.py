@@ -5,7 +5,6 @@ from io import BytesIO
 import requests
 from bs4 import BeautifulSoup
 from django.db import transaction
-from selenium.webdriver.chrome import webdriver
 
 from apps.manga.models import Author, Genre, Manga
 

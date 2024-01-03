@@ -2,6 +2,8 @@
 
 {% block stylesheets %}
     <style>
+        /* Estilos existentes aquí */
+        
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
@@ -22,13 +24,13 @@
 
         .pagination {
             display: flex;
-            flex-direction: column;  /* Cambiado de row a column */
+            flex-direction: column; /* Cambiado de row a column */
             align-items: center;
             margin-top: 20px;
         }
 
         .pagination div {
-            margin: 5px 0;  /* Añadido margen para separar cada div */
+            margin: 5px 0; /* Añadido margen para separar cada div */
         }
 
         .pagination a {
@@ -42,12 +44,167 @@
         .pagination a:hover {
             background-color: #000;
         }
+
+        /* Estilos para mejorar la apariencia del select de Select2 con colores oscuros */
+        .select2-container--default .select2-selection--multiple,
+        .select2-container--default .select2-selection--single,
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            background-color: #343a40; /* Fondo oscuro */
+            color: #fff; /* Texto blanco */
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 0.25rem;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            border-color: transparent transparent transparent #fff; /* Color de la flecha */
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #2d3238; /* Fondo más oscuro para las opciones seleccionadas */
+            color: #fff; /* Texto blanco para las opciones seleccionadas */
+            border: 1px solid #495057; /* Borde de las opciones seleccionadas */
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: #ced4da; /* Color del icono de remover opción */
+        }
+
+        .select2-container--default .select2-results__option {
+            background-color: #343a40; /* Fondo de las opciones en el menú desplegable */
+            color: #fff; /* Texto de las opciones en el menú desplegable */
+            border-bottom: 1px solid #495057; /* Borde entre opciones en el menú desplegable */
+        }
+
+        .select2-container--default .select2-results__option[aria-selected=true] {
+            background-color: #2d3238; /* Fondo de las opciones seleccionadas en el menú desplegable */
+        }
+
+        /* Nuevos estilos para la versión personalizada de custom-fixed-plugin */
+        .custom-fixed-plugin {
+            margin-top: 5rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .custom-fixed-plugin .dropdown-menu {
+            width: 16rem;
+            right: 0;
+            left: auto;
+            transform: translate3d(0px, 3.125rem, 0px);
+            top: 0;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            text-align: left;
+            position: absolute;
+            background-color: #343a40; /* Fondo oscuro */
+            color: #fff; /* Texto blanco */
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0.25rem 0.5rem 0 rgba(0, 0, 0, 0.15);
+            z-index: 1000; /* Asegura que el menú esté sobre otros elementos */
+        }
+
+        .custom-fixed-plugin .dropdown-menu li {
+            padding: 0.5rem 1.25rem;
+            cursor: pointer;
+        }
+
+        .custom-fixed-plugin .dropdown-menu li.adjustments-line {
+            padding: 0;
+            margin: 0.5rem 0;
+        }
+
+        .custom-fixed-plugin .dropdown-menu li.header-title {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            margin: 0.625rem 0 0.3125rem;
+            line-height: 1.5;
+            letter-spacing: 0.0625rem;
+        }
+
+        .custom-fixed-plugin .dropdown-menu li.button-container {
+            text-align: center;
+            margin-top: 1.25rem;
+        }
+
+        .custom-fixed-plugin .dropdown-menu button {
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            border-radius: 0.25rem;
+            background-color: #343a40; /* Fondo oscuro */
+            color: #fff; /* Texto blanco */
+            border: none;
+        }
+
+        .custom-fixed-plugin .dropdown-menu button:hover {
+            background-color: #2d3238; /* Cambio de color al pasar el ratón */
+        }
+
+        /* Mejora visual para el botón del custom-fixed-plugin */
+        .custom-fixed-plugin .dropdown-toggle::after {
+            content: none; /* Elimina el icono de flecha */
+        }
+
+        .custom-fixed-plugin .dropdown-toggle {
+            background-color: #343a40; /* Fondo oscuro */
+            color: #fff; /* Texto blanco */
+            border: none;
+            border-radius: 0.25rem;
+            padding: 0.75rem 1rem;
+        }
+
+        .custom-fixed-plugin .dropdown-toggle:hover {
+            background-color: #2d3238; /* Cambio de color al pasar el ratón */
+        }
     </style>
+    <!-- Incluye Select2 desde el CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
 {% endblock stylesheets %}
 
 {% block content %}
     <div class="content">
         <h1>All Mangas</h1>
+
+        <!-- Resto de tu contenido de mangas aquí -->
+
+        <div class="custom-fixed-plugin">
+            <div class="dropdown show-dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="customFixedPluginButton"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Filtrar Mangas
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="customFixedPluginButton">
+                    <li class="header-title">Opciones de Filtro</li>
+                    <li class="adjustments-line">
+                        <input type="text" id="titleInput" name="title" placeholder="Buscar por título"
+                               class="form-control">
+                    </li>
+                    <li class="adjustments-line">
+                        <select id="genreSelect" name="genre" multiple class="form-control">
+                            {% for genre in genres %}
+                                <option value="{{ genre }}">{{ genre }}</option>
+                            {% endfor %}
+                            <!-- Agregar más géneros según tus necesidades -->
+                        </select>
+                    </li>
+                    <li class="adjustments-line">
+                        <input type="text" id="authorInput" name="author" placeholder="Elegir autor"
+                               class="form-control">
+                    </li>
+                    <li class="adjustments-line">
+                        <label for="startYear">Año de inicio:</label>
+                        <input type="number" id="startYear" name="start_year" min="1900" max="2024"
+                               class="form-control">
+
+                        <label for="endYear">Año de fin:</label>
+                        <input type="number" id="endYear" name="end_year" min="1900" max="2024" class="form-control">
+                    </li>
+                    <li class="button-container">
+                        <button onclick="applyFilters()" class="btn btn-dark btn-block">Aplicar Filtros</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
         <div class="manga-container">
             {% for manga in mangas %}
                 {% include "manga/manga_card.html" with manga=manga %}
@@ -60,24 +217,83 @@
             </div>
             <div>
                 {% if mangas.has_previous %}
-                    <a href="?page=1">&laquo; primera</a>
-                    <a href="?page={{ mangas.previous_page_number }}">anterior</a>
+                    <a href="?page=1{% if mangas.number != 1 %}&title={{ request.GET.title }}&genre={{ request.GET.genre }}&author={{ request.GET.author }}&start_year={{ request.GET.start_year }}&end_year={{ request.GET.end_year }}{% endif %}"
+                       class="btn btn-secondary">&laquo; primera</a>
+                    <a href="?page=
+                            
+                            {{ mangas.previous_page_number }}{% if mangas.number != 1 %}&title={{ request.GET.title }}&genre={{ request.GET.genre }}&author={{ request.GET.author }}&start_year={{ request.GET.start_year }}&end_year={{ request.GET.end_year }}{% endif %}"
+                       class="btn btn-secondary">anterior</a>
                 {% endif %}
-
                 {% for page_num in mangas.paginator.page_range %}
                     {% if page_num > mangas.number and page_num <= mangas.number|add:5 %}
-                        <a href="?page={{ page_num }}">{{ page_num }}</a>
+                        <a href="?page=
+                                
+                                {{ page_num }}{% if mangas.number != 1 %}&title={{ request.GET.title }}&genre={{ request.GET.genre }}&author={{ request.GET.author }}&start_year={{ request.GET.start_year }}&end_year={{ request.GET.end_year }}{% endif %}"
+                           class="btn btn-secondary">{{ page_num }}</a>
                     {% endif %}
                 {% endfor %}
-
                 {% if mangas.has_next %}
-                    <a href="?page={{ mangas.next_page_number }}">siguiente</a>
-                    <a href="?page={{ mangas.paginator.num_pages }}">última &raquo;</a>
+                    <a href="?page=
+                            
+                            {{ mangas.next_page_number }}{% if mangas.number != 1 %}&title={{ request.GET.title }}&genre={{ request.GET.genre }}&author={{ request.GET.author }}&start_year={{ request.GET.start_year }}&end_year={{ request.GET.end_year }}{% endif %}"
+                       class="btn btn-secondary">siguiente</a>
+                    <a href="?page=
+                            
+                            {{ mangas.paginator.num_pages }}{% if mangas.number != 1 %}&title={{ request.GET.title }}&genre={{ request.GET.genre }}&author={{ request.GET.author }}&start_year={{ request.GET.start_year }}&end_year={{ request.GET.end_year }}{% endif %}"
+                       class="btn btn-secondary">última &raquo;</a>
                 {% endif %}
             </div>
         </div>
+
     </div>
 {% endblock content %}
+
+
+{% block javascripts %}
+    <!-- Incluye jQuery y Select2 desde los CDNs -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+    <script>
+        // Agregar función para cerrar el desplegable al pulsar el botón
+        document.getElementById('customFixedPluginButton').addEventListener('click', function () {
+            $('.dropdown-menu').toggleClass('show');
+        });
+
+        // Evitar que se cierre el menú desplegable al hacer clic en una opción o en el botón
+        $('.custom-fixed-plugin .dropdown-menu').on('click', function (e) {
+            e.stopPropagation();
+        });
+
+        // Inicializar Select2 en el elemento #genreSelect
+        $('#genreSelect').select2();
+
+        // Agregar función para aplicar filtros
+        function applyFilters() {
+            var title = document.getElementById('titleInput').value;
+            var genres = Array.from(document.getElementById('genreSelect').selectedOptions).map(option => option.value);
+            var author = document.getElementById('authorInput').value;
+            var startYear = document.getElementById('startYear').value;
+            var endYear = document.getElementById('endYear').value;
+
+            // Obtener el número de la página actual y limpiar espacios en blanco
+            var currentPage = "{{ mangas.number }}".trim();
+
+            // Construir la URL con los parámetros de filtro y página actual
+            var url = `list_all_mangas?page=${currentPage}&title=${title}&genre=${genres.join(',')}&author=${author}&start_year=${startYear}&end_year=${endYear}`;
+            console.log(url);
+
+            // Redirigir a la página filtrada
+            window.location.href = url;
+        }
+    </script>
+{% endblock javascripts %}
+
+
+
+
+
+
 
 
 
