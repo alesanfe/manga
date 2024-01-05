@@ -1,10 +1,8 @@
 import logging
 import os
-from contextlib import closing
 
 from whoosh.fields import Schema, TEXT, NUMERIC, KEYWORD
 from whoosh.index import create_in
-from whoosh.writing import AsyncWriter
 
 from apps.manga.models import Manga
 

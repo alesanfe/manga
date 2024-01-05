@@ -24,13 +24,13 @@ def pages(request):
     # All resource paths end in .html.
     # Pick out the html file name from the url. And load that template.
     try:
-
+        print(request.path)
         load_template = request.path.split('/')[-1]
 
         if load_template == 'admin':
             return HttpResponseRedirect(reverse('admin:index'))
         context['segment'] = load_template
-
+        print('Loading')
         html_template = loader.get_template('home/' + load_template)
         return HttpResponse(html_template.render(context, request))
 
@@ -39,6 +39,7 @@ def pages(request):
         html_template = loader.get_template('home/page-404.html')
         return HttpResponse(html_template.render(context, request))
 
-    except:
+    except Exception as e:
+        print(e)
         html_template = loader.get_template('home/page-500.html')
         return HttpResponse(html_template.render(context, request))

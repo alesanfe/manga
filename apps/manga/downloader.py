@@ -14,6 +14,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from concurrent.futures import ProcessPoolExecutor
 import tempfile
+import PyPDF2
 
 logging.basicConfig(level=logging.INFO)
 
@@ -135,21 +136,21 @@ def download_chapter_images(chapter_links: Dict[int, str]) -> list:
         return images
 
 
-def create_pdf(images: list, pdf_filename: str) -> None:
+def create_pdf(images: list) -> BytesIO:
     """
     Creates a PDF file from a list of image URLs.
 
     Parameters:
         images (list): A list of strings representing the URLs of the images to include in the PDF.
-        pdf_filename (str): The filename of the PDF file to create.
 
     Returns:
-        None
+        BytesIO: A BytesIO object containing the generated PDF data.
 
     Raises:
         Exception: If there is an error creating the PDF or removing temporary files.
     """
-    c = canvas.Canvas(pdf_filename, pagesize=letter)
+    pdf_data = BytesIO()
+    c = canvas.Canvas(pdf_data, pagesize=letter)
     width, height = letter
     with ProcessPoolExecutor() as executor:
         temp_files = []
@@ -176,7 +177,36 @@ def create_pdf(images: list, pdf_filename: str) -> None:
                     logging.error(f"Error removing temporary file {temp_file}: {e}")
 
     c.save()
-    logging.info(f'PDF generated: {pdf_filename}')
+    logging.info('PDF generated')
+    pdf_data.seek(0)
+    return pdf_data
+
+def download_selected_chapters(manga: str, chapters: list) -> BytesIO:
+    """
+    Downloads the selected chapters of a manga.
+
+    Parameters:
+        manga (str): The name of the manga.
+        chapters (list): A list of chapter numbers to download.
+
+    Returns:
+        BytesIO: A BytesIO object containing the generated PDF data.
+    """
+    url = f'https://my.ninemanga.com/manga/{manga}.html?waring=1'
+    try:
+        soup = get_soup(url)
+        extract_title(soup)
+        chapter_links = extract_chapters(soup)
+        for chapter_number, link in chapter_links.items():
+            if int(chapter_number) in chapters:
+                chapter_images = download_chapter_images({chapter_number: link})
+                return create_pdf(chapter_images)
+    except Exception as e:
+        logging.error(f"Error downloading chapters: {e}")
+
+# The other two functions can remain unchanged.
+
+
 
 
 def download_selected_chapters(manga: str, chapters: list) -> None:
@@ -188,18 +218,19 @@ def download_selected_chapters(manga: str, chapters: list) -> None:
         chapters (list): A list of chapter numbers to download.
 
     Returns:
-        None
+        list: A list of chapter numbers to download
     """
     url = f'https://my.ninemanga.com/manga/{manga}.html?waring=1'
     try:
         soup = get_soup(url)
         manga_title = extract_title(soup)
         chapter_links = extract_chapters(soup)
+        list_chapter = []
         for chapter_number, link in chapter_links.items():
             if int(chapter_number) in chapters:
                 chapter_images = download_chapter_images({chapter_number: link})
                 pdf_filename = f'{manga_title} Chapter {chapter_number}.pdf'
-                create_pdf(chapter_images, pdf_filename)
+                list_chapter.append(create_pdf(chapter_images, pdf_filename))
     except Exception as e:
         logging.error(f"Error downloading chapters: {e}")
 
@@ -212,9 +243,9 @@ def download_range_of_chapters(manga: str, start_chapter: int, end_chapter: int)
         manga (str): The name of the manga to download.
 
     Returns:
-        None
+        list: A list of chapter numbers to download
     """
-    download_selected_chapters(manga, range(start_chapter, end_chapter + 1))
+    return download_selected_chapters(manga, range(start_chapter, end_chapter + 1))
 
 
 def download_all_chapters(manga: str) -> None:
@@ -225,11 +256,41 @@ def download_all_chapters(manga: str) -> None:
         manga (str): The name of the manga to download chapters from.
 
     Returns:
-        None
+        list: A list of chapter numbers to download
     """
-    download_selected_chapters(manga, range(0, sys.maxsize))
+    return download_selected_chapters(manga, range(-sys.maxsize, sys.maxsize))
 
+def combine_pdfs(pdf_data_list: list) -> BytesIO:
+    """
+    Combina varios archivos PDF en uno solo.
 
-# Example usage:
-if __name__ == '__main__':
-    download_all_chapters('Gantz')
+    Parameters:
+        pdf_data_list (list): Una lista de BytesIO que contiene datos de archivos PDF.
+
+    Returns:
+        BytesIO: Un BytesIO que contiene los datos del PDF combinado.
+    """
+    # Crear un objeto merger de PyPDF2
+    pdf_merger = PyPDF2.PdfFileMerger()
+
+    try:
+        # Agregar cada PDF a la combinación
+        for pdf_data in pdf_data_list:
+            pdf_merger.append(pdf_data)
+
+        # Crear un BytesIO para almacenar el PDF combinado
+        combined_pdf_data = BytesIO()
+        # Escribir el PDF combinado en el BytesIO
+        pdf_merger.write(combined_pdf_data)
+
+        # Mover el puntero del BytesIO al principio
+        combined_pdf_data.seek(0)
+
+        return combined_pdf_data
+    except Exception as e:
+        # Manejar cualquier error que pueda ocurrir durante la combinación
+        print(f"Error al combinar PDFs: {e}")
+        return None
+    finally:
+        # Cerrar el objeto merger
+        pdf_merger.close()

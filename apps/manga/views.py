@@ -1,10 +1,11 @@
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render
-from whoosh.query import Every
 
 from apps.manga.create_index import index_all_mangas
 from apps.manga.models import Manga, Genre
 from apps.manga.populate_db import populate_mangas
+from whoosh.qparser import MultifieldParser, GtLtPlugin
+from whoosh.index import open_dir
 
 
 # Create your views here.
@@ -13,59 +14,6 @@ def populate_db(request):
     index_all_mangas()
     return render(request, 'manga/populate_db.html')
 
-from django.db.models import Q
-
-'''
-def list_all_mangas(request):
-    mangas_list = Manga.objects.all()
-
-    # Filtros
-    title_filter = request.GET.get('title')
-    genre_filter = request.GET.get('genre')  # Cambiado a obtener solo un valor
-    author_filter = request.GET.get('author')
-    start_year_filter = request.GET.get('start_year')
-    end_year_filter = request.GET.get('end_year')
-
-    print(title_filter, genre_filter, author_filter, start_year_filter, end_year_filter)
-
-    # Aplicar filtros si se proporcionan
-    if title_filter:
-        mangas_list = mangas_list.filter(title__icontains=title_filter)
-    if genre_filter:
-        # Convertir la cadena de géneros en una lista
-        genres_list = genre_filter.split(',')
-        mangas_list = mangas_list.filter(genres__name__in=genres_list)
-    if author_filter:
-        mangas_list = mangas_list.filter(author__icontains=author_filter)
-    if start_year_filter:
-        mangas_list = mangas_list.filter(year__gte=int(start_year_filter))
-    if end_year_filter:
-        mangas_list = mangas_list.filter(year__lte=int(end_year_filter))
-
-    paginator = Paginator(mangas_list, 12)  # Muestra 12 mangas por página
-
-    page = request.GET.get('page')
-    try:
-        mangas = paginator.page(page)
-    except PageNotAnInteger:
-        # Si la página no es un número entero, entrega la primera página
-        mangas = paginator.page(1)
-    except EmptyPage:
-        # Si la página está fuera del rango (por ejemplo, 9999), entrega la última página
-        mangas = paginator.page(paginator.num_pages)
-
-    names_genres = Genre.objects.all().values_list('name', flat=True)
-
-    return render(request, 'manga/list_all_mangas.html', {'mangas': mangas, 'genres': names_genres})
-'''
-from whoosh.qparser import QueryParser, MultifieldParser
-from whoosh.index import open_dir
-
-from whoosh.qparser import MultifieldParser
-from whoosh.index import open_dir
-
-from whoosh.qparser import MultifieldParser
-from whoosh.index import open_dir
 
 def list_all_mangas(request):
     # Abre el índice
@@ -92,16 +40,15 @@ def list_all_mangas(request):
     if author_filter:
         query_parts.append(f"author_name:{author_filter}")
     if start_year_filter:
-        query_parts.append(f"release_year:>={start_year_filter}")
+        query_parts.append(f"release_year:[{start_year_filter} TO 3000]")
     if end_year_filter:
-        query_parts.append(f"release_year:<={end_year_filter}")
+        query_parts.append(f"release_year:[0000 TO {end_year_filter}]")
 
     # Si no se proporciona ningún filtro, incluir todos los mangas
     if not query_parts:
         query_parts.append("title:*")  # Filtro comodín que coincide con cualquier título
 
-    print(query_parts, genre_filter)
-
+    print("Final Query:", " AND ".join(query_parts))
     query = parser.parse(" AND ".join(query_parts))
 
     # Realiza la búsqueda
@@ -126,8 +73,6 @@ def list_all_mangas(request):
 
     return render(request, 'manga/list_all_mangas.html', {'mangas': mangas, 'genres': names_genres})
 
-
-
     # Realiza la búsqueda
     with index.searcher() as searcher:
         results = searcher.search_page(query, 1, pagelen=12)  # Muestra 12 mangas por página
@@ -139,7 +84,7 @@ def list_all_mangas(request):
     return render(request, 'manga/list_all_mangas.html', {'mangas': mangas, 'genres': names_genres})
 
 
-
 def find_manga(request, pk):
     print(Manga.objects.get(pk=pk).num_caps)
     return render(request, 'manga/manga_details.html', {'manga': Manga.objects.get(pk=pk)})
+

@@ -102,14 +102,21 @@
             <h1>{{ manga.title }}</h1>
             <p class="attribute"><span style="font-size: 1.5rem;">{{ manga.views }} views</span></p>
             <p class="attribute"><strong>Num chapters:</strong> {{ manga.num_caps }}</p>
-            <p class="attribute"><strong>Author:</strong> {{ manga.author.name }}</p>
+            <p class="attribute"><strong>Author:</strong> 
+                <a href="/list_all_mangas?author={{ manga.author.name }}">{{ manga.author.name }}</a>
+            </p>
             {% if manga.release_year %}
-                <p class="attribute"><strong>Release year:</strong> {{ manga.release_year }}</p>
+                
+                <p class="attribute"><strong>Release year:</strong> 
+                    <a href="/list_all_mangas?start_year={{ manga.release_year }}&end_year={{ manga.release_year }}">{{ manga.release_year }}</a>
+                </p>
             {% endif %}
 
             <p class="attribute"><strong>Etiquetas:</strong>
                 {% for genre in manga.genres.all %}
-                    <span class="criteria-box">{{ genre.name }}</span>
+                    <span class="criteria-box">
+                        <a href="/list_all_mangas?genre={{ genre.name }}">{{ genre.name }}</a>
+                    </span>
                 {% endfor %}
             </p>
             {% include "manga/expand_text.html" with title="Descripción" description="Firulais" %}

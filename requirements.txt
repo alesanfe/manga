@@ -16,3 +16,5 @@ psycopg2-binary==2.9.9
 Whoosh==2.7.4
 reportlab==4.0.8
 selenium==4.16.0
+djangorestframework==3.14.0
+PyPDF2==3.0.1
