@@ -2,6 +2,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render
 
 from apps.manga.create_index import index_all_mangas
+from apps.manga.downloader import get_soup, extract_chapters
 from apps.manga.models import Manga, Genre
 from apps.manga.populate_db import populate_mangas
 from whoosh.qparser import MultifieldParser, GtLtPlugin
@@ -87,4 +88,9 @@ def list_all_mangas(request):
 def find_manga(request, pk):
     print(Manga.objects.get(pk=pk).num_caps)
     return render(request, 'manga/manga_details.html', {'manga': Manga.objects.get(pk=pk)})
+
+def list_all_chapters(request, manga):
+    soup = get_soup(f'https://my.ninemanga.com/manga/{manga}.html?waring=1')
+    dict_chapters = extract_chapters(soup)
+    return render(request, 'manga/manga_chapters.html', {'chapters': dict_chapters, 'manga': manga})
 

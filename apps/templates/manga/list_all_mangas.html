@@ -170,10 +170,10 @@
             <div class="dropdown show-dropdown">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="customFixedPluginButton"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Filtrar Mangas
+                    Manga Filter
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="customFixedPluginButton">
-                    <li class="header-title">Opciones de Filtro</li>
+                    <li class="header-title">Filter Options</li>
                     <li class="adjustments-line">
                         <input type="text" id="titleInput" name="title" placeholder="Buscar por título"
                                class="form-control">
@@ -191,15 +191,15 @@
                                class="form-control">
                     </li>
                     <li class="adjustments-line">
-                        <label for="startYear">Año de inicio:</label>
+                        <label for="startYear">Start Year:</label>
                         <input type="number" id="startYear" name="start_year" min="1900" max="2024"
                                class="form-control">
 
-                        <label for="endYear">Año de fin:</label>
+                        <label for="endYear">Finish Year:</label>
                         <input type="number" id="endYear" name="end_year" min="1900" max="2024" class="form-control">
                     </li>
                     <li class="button-container">
-                        <button onclick="applyFilters()" class="btn btn-dark btn-block">Aplicar Filtros</button>
+                        <button onclick="applyFilters()" class="btn btn-dark btn-block">Apply Filters</button>
                     </li>
                 </ul>
             </div>
@@ -213,16 +213,16 @@
 
         <div class="pagination">
             <div>
-                <span>Página {{ mangas.number }} de {{ mangas.paginator.num_pages }}.</span>
+                <span>Page {{ mangas.number }} of {{ mangas.paginator.num_pages }}.</span>
             </div>
             <div>
                 {% if mangas.has_previous %}
                     <a href="?page=1{% if mangas.number != 1 %}&title={{ request.GET.title }}&genre={{ request.GET.genre }}&author={{ request.GET.author }}&start_year={{ request.GET.start_year }}&end_year={{ request.GET.end_year }}{% endif %}"
-                       class="btn btn-secondary">&laquo; primera</a>
+                       class="btn btn-secondary">&laquo; firsts</a>
                     <a href="?page=
                             
                             {{ mangas.previous_page_number }}{% if mangas.number != 1 %}&title={{ request.GET.title }}&genre={{ request.GET.genre }}&author={{ request.GET.author }}&start_year={{ request.GET.start_year }}&end_year={{ request.GET.end_year }}{% endif %}"
-                       class="btn btn-secondary">anterior</a>
+                       class="btn btn-secondary">previous</a>
                 {% endif %}
                 {% for page_num in mangas.paginator.page_range %}
                     {% if page_num > mangas.number and page_num <= mangas.number|add:5 %}
@@ -236,11 +236,11 @@
                     <a href="?page=
                             
                             {{ mangas.next_page_number }}{% if mangas.number != 1 %}&title={{ request.GET.title }}&genre={{ request.GET.genre }}&author={{ request.GET.author }}&start_year={{ request.GET.start_year }}&end_year={{ request.GET.end_year }}{% endif %}"
-                       class="btn btn-secondary">siguiente</a>
+                       class="btn btn-secondary">next</a>
                     <a href="?page=
                             
                             {{ mangas.paginator.num_pages }}{% if mangas.number != 1 %}&title={{ request.GET.title }}&genre={{ request.GET.genre }}&author={{ request.GET.author }}&start_year={{ request.GET.start_year }}&end_year={{ request.GET.end_year }}{% endif %}"
-                       class="btn btn-secondary">última &raquo;</a>
+                       class="btn btn-secondary">last &raquo;</a>
                 {% endif %}
             </div>
         </div>

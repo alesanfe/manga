@@ -95,8 +95,12 @@
 
 {% block content %}
     <div class="container2">
-        <div class="left-half">
-            <img src="{{ ASSETS_ROOT }}/{{ manga.image_link }}" alt="Imagen Base" class="details-image">
+        <div class="left-half" style="position: relative; display: flex; flex-direction: column; align-items: center;">
+            <img src="{{ ASSETS_ROOT }}/{{ manga.image_link }}" alt="Imagen Base" class="details-image"
+                 style="order: 1;">
+            <div style="order: 2;">
+                {% include "manga/downloaders/download_all_chapters.html" with name=manga.title %}
+            </div>
         </div>
         <div class="right-half">
             <h1>{{ manga.title }}</h1>
@@ -119,73 +123,8 @@
                     </span>
                 {% endfor %}
             </p>
-            {% include "manga/expand_text.html" with title="Descripción" description="Firulais" %}
+            {% include "manga/expand_text.html" with title="Descripción" name=manga.title %}
         </div>
-
-
-        <form id="mangaDownloadForm">
-            {% csrf_token %}
-            <label for="mangaName">Nombre del manga:</label>
-            <input type="text" id="mangaName" name="mangaName" required>
-
-            <label for="chapters">Capítulos (separados por comas):</label>
-            <input type="text" id="chapters" name="chapters" required>
-
-            <button type="button" onclick="downloadManga()">Descargar Manga</button>
-        </form>
-
-        <div id="result"></div>
-
-        <script>
-            function downloadManga() {
-                // Obtener los valores del formulario
-                var mangaName = $('#mangaName').val();
-                var chapters = $('#chapters').val().split(',');
-
-                console.log(chapters);
-                console.log(chapters !== ['']);
-
-                // Crear objeto de datos
-                var requestData = {
-                    manga_name: mangaName,
-                    chapters: chapters[0] !== '' ? chapters.map(Number) : []
-                };
-
-                $.ajaxSetup({
-                    beforeSend: function (xhr, settings) {
-                        if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                            // Solo agrega el token CSRF a las solicitudes del mismo dominio
-                            xhr.setRequestHeader("X-CSRFToken", $('[name="csrfmiddlewaretoken"]').val());
-                        }
-                    }
-                });
-
-                // Realizar solicitud AJAX
-                $.ajax({
-                    url: '/download',  // URL de tu vista Django
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(requestData),
-                    xhrFields: {
-                        responseType: 'blob'
-                    },
-                    success: function (response) {
-                        var link = document.createElement('a');
-                        link.href = window.URL.createObjectURL(response);
-                        link.download = 'manga_download.zip';
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                    },
-                    error: function (error) {
-                        // Manejar errores
-                        $('#result').text('Error al descargar el manga.');
-                    }
-                });
-            }
-        </script>
-
-
     </div>
 {% endblock content %}
 

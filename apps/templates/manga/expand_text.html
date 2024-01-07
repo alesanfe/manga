@@ -60,7 +60,8 @@
         </div>
         <div class="text-description">
             <p style="color: #000;">
-                {{ description }}
+                {% include "manga/downloaders/download_range_chapters.html" with name=name %}
+                <a href="{% url 'list_all_chapters' name %} " target="_blank">List all chapters</a>
             </p>
         </div>
     </div>

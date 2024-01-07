@@ -13,6 +13,7 @@ from apps.manga.serializer import MangaDownloadSerializer
 class MangaDownloadView(APIView):
     def post(self, request):
         serializer = MangaDownloadSerializer(data=request.data)
+        print('Hola')
         if serializer.is_valid():
             manga_name = serializer.validated_data['manga_name']
             chapters = serializer.validated_data['chapters']

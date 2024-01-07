@@ -1,30 +1,31 @@
+<!-- Template1.html -->
 <form id="mangaDownloadForm">
     {% csrf_token %}
-    <button type="button" onclick="downloadMangaOneChapter({{ chapter }})" style="background-color: #343a40; color: #fff; padding: 1rem 2rem; border: none; border-radius: 0.5rem; cursor: pointer; font-size: 1rem;">
-    Descargar Capítulo
+    <button type="button" onclick="downloadAllManga()"
+            style="background-color: #343a40; color: #fff; padding: 1rem 2rem; border: none; border-radius: 0.5rem; cursor: pointer; font-size: 1rem;">
+        Descargar Manga
     </button>
 </form>
 
 <script>
-    function downloadMangaOneChapter(chapter) {
-        // Obtener los valores del formulario
-        var mangaName = '{{ name }}';
+    function downloadAllManga() {
+        // Obtener el valor del formulario
+        var mangaName = '{{ name }}'
 
         // Crear objeto de datos
         var requestData = {
             manga_name: mangaName,
-            chapters: [parseInt(chapter)]
+            chapters: []
         };
-        
+
         console.log(requestData)
-        
+
         $.ajaxSetup({
             beforeSend: function (xhr, settings) {
                 if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
                     // Solo agrega el token CSRF a las solicitudes del mismo dominio
                     xhr.setRequestHeader("X-CSRFToken", $('[name="csrfmiddlewaretoken"]').val());
                 }
-                
             }
         });
 
@@ -37,6 +38,10 @@
             xhrFields: {
                 responseType: 'blob'
             },
+            beforeSend: function () {
+                // Muestra un mensaje de progreso antes de la solicitud
+                alert('Descargando el manga. Por favor, espera...');
+            },
             success: function (response) {
                 var link = document.createElement('a');
                 link.href = window.URL.createObjectURL(response);
@@ -48,11 +53,11 @@
             error: function (error) {
                 // Manejar errores
                 alert('Hubo un error al descargar el manga.');
-                console.log(error)
             },
             complete: function () {
                 alert('Descarga completada.')
             }
         });
+
     }
 </script>
