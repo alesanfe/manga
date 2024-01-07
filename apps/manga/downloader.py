@@ -2,6 +2,7 @@ import os
 import logging
 import re
 import sys
+import zipfile
 from typing import Dict
 
 import requests
@@ -165,6 +166,7 @@ def create_pdf(images: list) -> BytesIO:
                         temp_file_stream.write(img_data.getvalue())
                     c.drawImage(temp_file, 0, 0, width, height)
                     c.showPage()
+                    logging.info(f"Added image to PDF: {image_url}")
                 else:
                     logging.error(f"Failed to download image: {image_url}")
         except Exception as e:
@@ -179,9 +181,13 @@ def create_pdf(images: list) -> BytesIO:
     c.save()
     logging.info('PDF generated')
     pdf_data.seek(0)
+
     return pdf_data
 
-def download_selected_chapters(manga: str, chapters: list) -> BytesIO:
+
+
+
+def download_selected_chapters(manga: str, chapters: list) -> dict:
     """
     Downloads the selected chapters of a manga.
 
@@ -190,52 +196,25 @@ def download_selected_chapters(manga: str, chapters: list) -> BytesIO:
         chapters (list): A list of chapter numbers to download.
 
     Returns:
-        BytesIO: A BytesIO object containing the generated PDF data.
-    """
-    url = f'https://my.ninemanga.com/manga/{manga}.html?waring=1'
-    try:
-        soup = get_soup(url)
-        extract_title(soup)
-        chapter_links = extract_chapters(soup)
-        for chapter_number, link in chapter_links.items():
-            if int(chapter_number) in chapters:
-                chapter_images = download_chapter_images({chapter_number: link})
-                return create_pdf(chapter_images)
-    except Exception as e:
-        logging.error(f"Error downloading chapters: {e}")
-
-# The other two functions can remain unchanged.
-
-
-
-
-def download_selected_chapters(manga: str, chapters: list) -> None:
-    """
-    Downloads the selected chapters of a manga.
-
-    Parameters:
-        manga (str): The name of the manga.
-        chapters (list): A list of chapter numbers to download.
-
-    Returns:
-        list: A list of chapter numbers to download
+        dict: A dictionary mapping PDF filenames to BytesIO objects containing the PDF data.
     """
     url = f'https://my.ninemanga.com/manga/{manga}.html?waring=1'
     try:
         soup = get_soup(url)
         manga_title = extract_title(soup)
         chapter_links = extract_chapters(soup)
-        list_chapter = []
+        dic_chapter = {}
         for chapter_number, link in chapter_links.items():
             if int(chapter_number) in chapters:
                 chapter_images = download_chapter_images({chapter_number: link})
                 pdf_filename = f'{manga_title} Chapter {chapter_number}.pdf'
-                list_chapter.append(create_pdf(chapter_images, pdf_filename))
+                dic_chapter[pdf_filename] = create_pdf(chapter_images)
+        return dic_chapter
     except Exception as e:
         logging.error(f"Error downloading chapters: {e}")
 
 
-def download_range_of_chapters(manga: str, start_chapter: int, end_chapter: int) -> None:
+def download_range_of_chapters(manga: str, start_chapter: int, end_chapter: int) -> dict:
     """
     Download all chapters of a manga.
 
@@ -243,12 +222,12 @@ def download_range_of_chapters(manga: str, start_chapter: int, end_chapter: int)
         manga (str): The name of the manga to download.
 
     Returns:
-        list: A list of chapter numbers to download
+        dict: A dictionary mapping PDF filenames to BytesIO objects containing the PDF data.
     """
     return download_selected_chapters(manga, range(start_chapter, end_chapter + 1))
 
 
-def download_all_chapters(manga: str) -> None:
+def download_all_chapters(manga: str) -> dict:
     """
     Download all chapters of a manga.
 
@@ -256,41 +235,39 @@ def download_all_chapters(manga: str) -> None:
         manga (str): The name of the manga to download chapters from.
 
     Returns:
-        list: A list of chapter numbers to download
+        dict: A dictionary mapping PDF filenames to BytesIO objects containing the PDF data.
     """
     return download_selected_chapters(manga, range(-sys.maxsize, sys.maxsize))
 
-def combine_pdfs(pdf_data_list: list) -> BytesIO:
+
+def create_zip(pdf_data_dic: dict) -> BytesIO:
     """
-    Combina varios archivos PDF en uno solo.
+    Crea un archivo ZIP que contiene varios archivos PDF.
 
     Parameters:
-        pdf_data_list (list): Una lista de BytesIO que contiene datos de archivos PDF.
+        pdf_data_dic (dict): Un diccionario donde las claves son títulos y los valores son datos de archivos PDF (BytesIO).
 
     Returns:
-        BytesIO: Un BytesIO que contiene los datos del PDF combinado.
+        BytesIO: Un BytesIO que contiene los datos del archivo ZIP.
     """
-    # Crear un objeto merger de PyPDF2
-    pdf_merger = PyPDF2.PdfFileMerger()
-
     try:
-        # Agregar cada PDF a la combinación
-        for pdf_data in pdf_data_list:
-            pdf_merger.append(pdf_data)
+        # Crear un BytesIO para almacenar el archivo ZIP
+        zip_buffer = BytesIO()
 
-        # Crear un BytesIO para almacenar el PDF combinado
-        combined_pdf_data = BytesIO()
-        # Escribir el PDF combinado en el BytesIO
-        pdf_merger.write(combined_pdf_data)
+        # Crear un objeto ZipFile en modo escritura
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            # Agregar cada PDF al archivo ZIP
+            for title, pdf_data in pdf_data_dic.items():
+                # Agregar el PDF al archivo ZIP con el nombre del título
+                zip_file.writestr(title, pdf_data.getvalue())
 
         # Mover el puntero del BytesIO al principio
-        combined_pdf_data.seek(0)
+        zip_buffer.seek(0)
 
-        return combined_pdf_data
+        return zip_buffer
     except Exception as e:
-        # Manejar cualquier error que pueda ocurrir durante la combinación
-        print(f"Error al combinar PDFs: {e}")
+        # Manejar cualquier error que pueda ocurrir durante la creación del archivo ZIP
+        print(f"Error al crear el archivo ZIP: {e}")
         return None
-    finally:
-        # Cerrar el objeto merger
-        pdf_merger.close()
+
+

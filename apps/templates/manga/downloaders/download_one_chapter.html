@@ -1,0 +1,26 @@
+<form id="mangaDownloadForm2">
+    {% csrf_token %}
+    <label for="mangaName2">Nombre del manga:</label>
+    <input type="text" id="mangaName2" name="mangaName" required>
+
+    <label for="chapters2">Capítulo:</label>
+    <input type="text" id="chapters2" name="chapters" required>
+
+    <button type="button" onclick="downloadManga2()">Descargar Manga</button>
+</form>
+
+<script>
+    function downloadManga2() {
+        // Obtener los valores del formulario
+        var mangaName2 = $('#mangaName2').val();
+        var chapter2 = $('#chapters2').val();
+
+        // Crear objeto de datos
+        var requestData = {
+            manga_name: mangaName2,
+            chapters: [parseInt(chapter2)]
+        };
+
+        // Resto del código AJAX (copiar desde la función original)
+    }
+</script>

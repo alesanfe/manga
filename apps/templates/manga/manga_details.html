@@ -82,7 +82,7 @@
         .criteria-box:hover {
             background-color: #000; /* Color de fondo al pasar el ratón sobre el elemento */
         }
-        
+
         img.details-image {
             width: 40%; /* Ajusta el ancho de la imagen al 100% del contenedor */
             height: auto; /* Ajusta la altura de la imagen automáticamente según el ancho especificado */
@@ -102,12 +102,12 @@
             <h1>{{ manga.title }}</h1>
             <p class="attribute"><span style="font-size: 1.5rem;">{{ manga.views }} views</span></p>
             <p class="attribute"><strong>Num chapters:</strong> {{ manga.num_caps }}</p>
-            <p class="attribute"><strong>Author:</strong> 
+            <p class="attribute"><strong>Author:</strong>
                 <a href="/list_all_mangas?author={{ manga.author.name }}">{{ manga.author.name }}</a>
             </p>
             {% if manga.release_year %}
-                
-                <p class="attribute"><strong>Release year:</strong> 
+
+                <p class="attribute"><strong>Release year:</strong>
                     <a href="/list_all_mangas?start_year={{ manga.release_year }}&end_year={{ manga.release_year }}">{{ manga.release_year }}</a>
                 </p>
             {% endif %}
@@ -121,6 +121,71 @@
             </p>
             {% include "manga/expand_text.html" with title="Descripción" description="Firulais" %}
         </div>
+
+
+        <form id="mangaDownloadForm">
+            {% csrf_token %}
+            <label for="mangaName">Nombre del manga:</label>
+            <input type="text" id="mangaName" name="mangaName" required>
+
+            <label for="chapters">Capítulos (separados por comas):</label>
+            <input type="text" id="chapters" name="chapters" required>
+
+            <button type="button" onclick="downloadManga()">Descargar Manga</button>
+        </form>
+
+        <div id="result"></div>
+
+        <script>
+            function downloadManga() {
+                // Obtener los valores del formulario
+                var mangaName = $('#mangaName').val();
+                var chapters = $('#chapters').val().split(',');
+
+                console.log(chapters);
+                console.log(chapters !== ['']);
+
+                // Crear objeto de datos
+                var requestData = {
+                    manga_name: mangaName,
+                    chapters: chapters[0] !== '' ? chapters.map(Number) : []
+                };
+
+                $.ajaxSetup({
+                    beforeSend: function (xhr, settings) {
+                        if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                            // Solo agrega el token CSRF a las solicitudes del mismo dominio
+                            xhr.setRequestHeader("X-CSRFToken", $('[name="csrfmiddlewaretoken"]').val());
+                        }
+                    }
+                });
+
+                // Realizar solicitud AJAX
+                $.ajax({
+                    url: '/download',  // URL de tu vista Django
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(requestData),
+                    xhrFields: {
+                        responseType: 'blob'
+                    },
+                    success: function (response) {
+                        var link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(response);
+                        link.download = 'manga_download.zip';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    },
+                    error: function (error) {
+                        // Manejar errores
+                        $('#result').text('Error al descargar el manga.');
+                    }
+                });
+            }
+        </script>
+
+
     </div>
 {% endblock content %}
 
