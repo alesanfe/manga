@@ -1,5 +1,5 @@
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 from apps.manga.create_index import index_all_mangas
 from apps.manga.downloader import get_soup, extract_chapters
@@ -13,7 +13,7 @@ from whoosh.index import open_dir
 def populate_db(request):
     populate_mangas()
     index_all_mangas()
-    return render(request, 'manga/populate_db.html')
+    return redirect('list_all_mangas')
 
 
 def list_all_mangas(request):

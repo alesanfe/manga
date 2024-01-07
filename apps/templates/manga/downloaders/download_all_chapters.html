@@ -3,7 +3,7 @@
     {% csrf_token %}
     <button type="button" onclick="downloadAllManga()"
             style="background-color: #343a40; color: #fff; padding: 1rem 2rem; border: none; border-radius: 0.5rem; cursor: pointer; font-size: 1rem;">
-        Descargar Manga
+        Download Manga
     </button>
 </form>
 
@@ -38,10 +38,6 @@
             xhrFields: {
                 responseType: 'blob'
             },
-            beforeSend: function () {
-                // Muestra un mensaje de progreso antes de la solicitud
-                alert('Descargando el manga. Por favor, espera...');
-            },
             success: function (response) {
                 var link = document.createElement('a');
                 link.href = window.URL.createObjectURL(response);
@@ -52,10 +48,10 @@
             },
             error: function (error) {
                 // Manejar errores
-                alert('Hubo un error al descargar el manga.');
+                alert('There was an error downloading the manga.');
             },
             complete: function () {
-                alert('Descarga completada.')
+                alert('Manga downloaded successfully.');
             }
         });
 

@@ -2,13 +2,13 @@
 <form id="mangaDownloadForm">
     {% csrf_token %}
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <label for="start" style="color: #333; margin-right: 10px;">Comienzo:</label>
+        <label for="start" style="color: #333; margin-right: 10px;">Start:</label>
         <input type="text" id="start" name="start" required
                style="padding: 10px; border: 1px solid #495057; border-radius: 5px; width: 150px;">
     </div>
 
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <label for="end" style="color: #333; margin-right: 10px;">Fin:</label>
+        <label for="end" style="color: #333; margin-right: 10px;">End:</label>
         <input type="text" id="end" name="end" required
                style="padding: 10px; border: 1px solid #495057; border-radius: 5px; width: 150px;">
     </div>
@@ -16,7 +16,7 @@
 
     <button type="button" onclick="downloadMangaStartAndEnd()"
             style="background-color: #343a40; color: #fff; padding: 0.5rem 1rem; border: none; border-radius: 0.5rem; cursor: pointer; font-size: 0.875rem;">
-        Descargar Rango de capítulo
+        Download range Chapters
     </button>
 </form>
 
@@ -50,10 +50,6 @@
             data: JSON.stringify(requestData),
             xhrFields: {
                 responseType: 'blob'
-            },
-            beforeSend: function () {
-                // Muestra un mensaje de progreso antes de la solicitud
-                alert('Descargando el manga. Por favor, espera...');
             },
             success: function (response) {
                 var link = document.createElement('a');

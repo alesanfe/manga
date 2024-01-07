@@ -1,21 +1,20 @@
-import os
 import logging
+import os
 import re
 import sys
+import tempfile
+import time
 import zipfile
+from concurrent.futures import ProcessPoolExecutor
+from io import BytesIO
 from typing import Dict
 
 import requests
 from bs4 import BeautifulSoup
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-import time
-from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-from concurrent.futures import ProcessPoolExecutor
-import tempfile
-import PyPDF2
+from selenium import webdriver
+from selenium.webdriver.common.by import By
 
 logging.basicConfig(level=logging.INFO)
 

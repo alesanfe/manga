@@ -1,7 +1,7 @@
 <form id="mangaDownloadForm">
     {% csrf_token %}
     <button type="button" onclick="downloadMangaOneChapter({{ chapter }})" style="background-color: #343a40; color: #fff; padding: 1rem 2rem; border: none; border-radius: 0.5rem; cursor: pointer; font-size: 1rem;">
-    Descargar Capítulo
+        Download Chapter
     </button>
 </form>
 
@@ -15,8 +15,6 @@
             manga_name: mangaName,
             chapters: [parseInt(chapter)]
         };
-        
-        console.log(requestData)
         
         $.ajaxSetup({
             beforeSend: function (xhr, settings) {
