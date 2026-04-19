@@ -1,0 +1,71 @@
+services:
+  mysql:
+    container_name: mysql_db
+    restart: always
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-manga_db}
+      MYSQL_USER: ${MYSQL_USER:-manga_db_usr}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-manga_pass}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_pass}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - db_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root_pass}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  manga-app:
+    container_name: manga_app
+    restart: always
+    env_file: .env
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfile
+    networks:
+      - db_network
+      - web_network
+    depends_on:
+      - mysql
+    volumes:
+      - static_volume:/usr/src/app/core/staticfiles
+      - media_volume:/usr/src/app/media
+    environment:
+      - POPULATE_DB=${POPULATE_DB:-false}
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; urllib.request.urlopen('http://127.0.0.1:5005/health/');\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  nginx:
+    container_name: nginx
+    restart: always
+    image: "nginx:latest"
+    ports:
+      - "5085:5085"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d:ro
+      - static_volume:/usr/share/nginx/html/static:ro
+      - media_volume:/usr/share/nginx/html/media:ro
+    networks:
+      - web_network
+    depends_on:
+      - manga-app
+
+volumes:
+  mysql_data:
+  static_volume:
+  media_volume:
+
+networks:
+  db_network:
+    driver: bridge
+  web_network:
+    driver: bridge
+

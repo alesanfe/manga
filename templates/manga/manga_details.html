@@ -1,0 +1,454 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} {{ manga.title }} {% endblock %}
+
+{% block stylesheets %}
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container2 {
+            display: flex;
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            margin-top: 6rem;
+            margin-left: 280px;
+            background-color: #fff;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .left-half {
+            flex: 0 0 30%;
+            padding: 2rem;
+            background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            border-right: 1px solid #e2e8f0;
+        }
+
+        .left-half img {
+            width: 100%;
+            max-width: 250px;
+            border-radius: 1rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            object-fit: cover;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .left-half img:hover {
+            transform: scale(1.05);
+        }
+
+        .stats-container {
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-icon {
+            font-size: 1.2rem;
+            margin-right: 0.5rem;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            color: #2d3748;
+            font-size: 1.1rem;
+        }
+
+        .right-half {
+            flex: 1;
+            padding: 2rem;
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+        }
+
+        .alternative-titles {
+            color: #718096;
+            font-size: 1rem;
+            font-style: italic;
+            margin-bottom: 1.5rem;
+        }
+
+        .attribute {
+            padding: 1rem 0;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            color: #2d3748;
+        }
+
+        .attribute:last-child {
+            border-bottom: none;
+        }
+
+        .attribute-label {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .attribute-value {
+            font-size: 1rem;
+            color: #2d3748;
+        }
+
+        .attribute-value a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .attribute-value a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .criteria-box {
+            display: inline-block;
+            padding: 0.6rem 1rem;
+            margin: 0.3rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .criteria-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .criteria-box a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-ongoing {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+
+        .status-completed {
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+            color: white;
+        }
+
+        .status-hiatus {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+            color: white;
+        }
+
+        .status-cancelled {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            color: white;
+        }
+
+        .status-unknown {
+            background: linear-gradient(135deg, #a0aec0 0%, #718096 100%);
+            color: white;
+        }
+
+        .download-section {
+            margin-top: 1.5rem;
+            width: 100%;
+        }
+
+        .download-container {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 1rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .download-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .download-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .download-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .download-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .container2 {
+                flex-direction: column;
+                width: 95%;
+                margin-top: 5rem;
+            }
+
+            .left-half {
+                border-right: none;
+                border-bottom: 1px solid #e2e8f0;
+                flex: none;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+{% endblock stylesheets %}
+
+{% block content %}
+    <div class="container2">
+        <div class="left-half">
+            <img src="/static/{{ manga.image_link }}" alt="{{ manga.title }}" class="details-image">
+            
+            <div class="stats-container">
+                <div class="stat-item">
+                    <span><span class="stat-icon">❤️</span> Likes</span>
+                    <span class="stat-value">{{ manga.likes }}</span>
+                </div>
+                <div class="stat-item">
+                    <span><span class="stat-icon">📖</span> Capítulos</span>
+                    <span class="stat-value">{{ manga.num_caps }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="right-half">
+            <h1>{{ manga.title }}</h1>
+            {% if manga.alternative_titles %}
+                <p class="alternative-titles">También conocido como: {{ manga.alternative_titles }}</p>
+            {% endif %}
+            
+            <div class="attribute">
+                <span class="attribute-label">Estado</span>
+                <div class="attribute-value">
+                    {% if manga.status == 'ongoing' %}
+                        <span class="status-badge status-ongoing">En curso</span>
+                    {% elif manga.status == 'completed' %}
+                        <span class="status-badge status-completed">Completado</span>
+                    {% elif manga.status == 'hiatus' %}
+                        <span class="status-badge status-hiatus">Pausado</span>
+                    {% elif manga.status == 'cancelled' %}
+                        <span class="status-badge status-cancelled">Cancelado</span>
+                    {% else %}
+                        <span class="status-badge status-unknown">Desconocido</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="attribute">
+                <span class="attribute-label">Autor</span>
+                <div class="attribute-value">
+                    <a href="/list_all_mangas?author={{ manga.author.name }}">{{ manga.author.name }}</a>
+                </div>
+            </div>
+
+            {% if manga.release_year %}
+            <div class="attribute">
+                <span class="attribute-label">Año de lanzamiento</span>
+                <div class="attribute-value">
+                    <a href="/list_all_mangas?start_year={{ manga.release_year }}&end_year={{ manga.release_year }}">{{ manga.release_year }}</a>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="attribute">
+                <span class="attribute-label">Géneros</span>
+                <div class="attribute-value">
+                    {% for genre in manga.genres.all %}
+                        <span class="criteria-box">
+                            <a href="/list_all_mangas?genre={{ genre.name }}">{{ genre.name }}</a>
+                        </span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {% if manga.details_link %}
+            <div class="attribute">
+                <span class="attribute-label">Enlace externo</span>
+                <div class="attribute-value">
+                    <a href="{{ manga.details_link }}" target="_blank" rel="noopener noreferrer">
+                        Ver más detalles ↗
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="attribute">
+                <span class="attribute-label">Resumen</span>
+                <div class="attribute-value">
+                    <p style="color: #4a5568; line-height: 1.6;">
+                        {% if manga.description %}
+                            {{ manga.description }}
+                        {% else %}
+                            {% if manga.alternative_titles %}
+                                <strong>Títulos alternativos:</strong> {{ manga.alternative_titles }}<br><br>
+                            {% endif %}
+                            Este manga tiene {{ manga.num_caps }} capítulos y actualmente está en estado
+                            {% if manga.status == 'ongoing' %}<span class="status-badge status-ongoing">En curso</span>
+                            {% elif manga.status == 'completed' %}<span class="status-badge status-completed">Completado</span>
+                            {% elif manga.status == 'hiatus' %}<span class="status-badge status-hiatus">Pausado</span>
+                            {% elif manga.status == 'cancelled' %}<span class="status-badge status-cancelled">Cancelado</span>
+                            {% else %}<span class="status-badge status-unknown">Desconocido</span>{% endif %}.
+                            <br><br>
+                            Para más información detallada sobre la trama y personajes, visita el enlace externo proporcionado.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="download-container">
+                <div class="download-title">
+                    <span>📥</span> Descargas
+                </div>
+                <div class="download-options">
+                    <div style="padding: 1rem; background: #f8f9fa; border-radius: 0.75rem; border: 1px solid #e2e8f0;">
+                        <h4 style="margin: 0 0 0.75rem 0; color: #2d3748; font-size: 0.9rem; font-weight: 600;">Descargar toda la serie</h4>
+                        {% include "manga/downloaders/download_all_chapters.html" with name=manga.title %}
+                    </div>
+                    <div style="padding: 1rem; background: #f8f9fa; border-radius: 0.75rem; border: 1px solid #e2e8f0;">
+                        <h4 style="margin: 0 0 0.75rem 0; color: #2d3748; font-size: 0.9rem; font-weight: 600;">Descargar rango de capítulos</h4>
+                        {% include "manga/downloaders/download_range_chapters.html" with name=manga.title %}
+                    </div>
+                    <div style="padding: 1rem; background: #f8f9fa; border-radius: 0.75rem; border: 1px solid #e2e8f0;">
+                        <h4 style="margin: 0 0 0.75rem 0; color: #2d3748; font-size: 0.9rem; font-weight: 600;">Descargar un capítulo específico</h4>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <input type="number" id="singleChapter" min="1" max="{{ manga.num_caps }}" placeholder="Nº capítulo"
+                                   style="padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; width: 120px;">
+                            <button type="button" onclick="downloadSingleChapter()"
+                                    style="padding: 0.5rem 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.5rem; cursor: pointer; font-weight: 600; font-size: 0.85rem;">
+                                Descargar
+                            </button>
+                        </div>
+                    </div>
+                    <a href="{% url 'list_all_chapters' manga.title %}" target="_blank" class="download-link">
+                        📋 Ver lista completa de capítulos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE -->
+{% block javascripts %}
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        function downloadSingleChapter() {
+            var chapter = $('#singleChapter').val();
+            if (!chapter || chapter < 1 || chapter > {{ manga.num_caps }}) {
+                alert('Por favor, introduce un número de capítulo válido (1-{{ manga.num_caps }})');
+                return;
+            }
+
+            var mangaName = '{{ manga.title }}';
+            var requestData = {
+                manga_name: mangaName,
+                chapters: [parseInt(chapter)]
+            };
+
+            $.ajaxSetup({
+                beforeSend: function (xhr, settings) {
+                    if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                        xhr.setRequestHeader("X-CSRFToken", $('[name="csrfmiddlewaretoken"]').val());
+                    }
+                }
+            });
+
+            $.ajax({
+                url: '/download',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(requestData),
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function (response) {
+                    var link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(response);
+                    link.download = mangaName + '_chapter_' + chapter + '.zip';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                },
+                error: function (error) {
+                    alert('Hubo un error al descargar el capítulo.');
+                    console.log(error);
+                },
+                complete: function () {
+                    alert('Descarga completada.');
+                }
+            });
+        }
+    </script>
+{% endblock javascripts %}
+
+
+
+
+

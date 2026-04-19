@@ -1,0 +1,761 @@
+{% extends "layouts/base.html" %}
+
+{% block stylesheets %}
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .content {
+            padding: 1rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Active filters tags */
+        .filter-tag {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .filter-tag:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .filter-tag .remove-filter {
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 700;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .filter-tag .remove-filter:hover {
+            opacity: 1;
+        }
+
+        /* No results message */
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .no-results-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Active filters container */
+        .active-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            justify-content: center;
+        }
+
+        /* Loading indicator */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .manga-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .pagination {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .pagination div {
+            margin: 0.5rem 0;
+        }
+
+        .pagination span {
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .pagination a {
+            padding: 0.6rem 1.2rem;
+            text-decoration: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 2rem;
+            margin: 0.3rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            border: 2px solid transparent;
+        }
+
+        .pagination a:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        /* Estilos mejorados para el filtro - Panel lateral derecho */
+        .custom-fixed-plugin {
+            position: fixed;
+            top: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .custom-fixed-plugin .dropdown-toggle {
+            position: fixed;
+            top: 5rem;
+            right: 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 1.5rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .custom-fixed-plugin .dropdown-toggle:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .custom-fixed-plugin .dropdown-toggle::after {
+            content: none;
+        }
+
+        .custom-fixed-plugin .dropdown-menu {
+            position: fixed;
+            top: 4rem;
+            right: -28rem;
+            width: 28rem;
+            height: calc(100vh - 4rem);
+            background: #ffffff;
+            color: #2d3748;
+            border: none;
+            box-shadow: -10px 0 40px rgba(0, 0, 0, 0.3);
+            z-index: 99999;
+            padding: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 0;
+        }
+
+        .custom-fixed-plugin .dropdown-menu.show {
+            right: 0;
+        }
+
+        .custom-fixed-plugin .dropdown-menu ul {
+            padding: 2rem;
+        }
+
+        .custom-fixed-plugin .dropdown-menu li {
+            padding: 0;
+            cursor: pointer;
+            list-style: none;
+        }
+
+        .custom-fixed-plugin .dropdown-menu li.adjustments-line {
+            padding: 0;
+            margin: 1rem 0;
+        }
+
+        .custom-fixed-plugin .dropdown-menu li.adjustments-line:first-of-type {
+            margin-top: 0;
+        }
+
+        .custom-fixed-plugin .dropdown-menu li.header-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin: 0 0 1rem 0;
+            line-height: 1.4;
+            letter-spacing: 0.5px;
+            color: #667eea;
+            padding: 0.5rem 0 0.5rem 0;
+            background: #f8f9fa;
+            border-radius: 0.5rem;
+        }
+
+        .custom-fixed-plugin .dropdown-menu li.section-divider {
+            margin: 1.5rem 0 1rem 0;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .custom-fixed-plugin .dropdown-menu li.button-container {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .custom-fixed-plugin .dropdown-menu .form-control {
+            border-radius: 0.75rem;
+            border: 2px solid #e2e8f0;
+            padding: 1rem 1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-size: 1rem;
+            background: white;
+            color: #2d3748;
+            min-height: 3rem;
+        }
+
+        .custom-fixed-plugin .dropdown-menu select.form-control {
+            color: #2d3748 !important;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%232d3748%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.6%201.8-13%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.6%205.4%2013%205.4h255.6c5%200%209.6-1.8%2013-5.4a17.6%2017.6%200%200%200%205.4-13V82.2c0-5-1.8-9.6-5.4-13z%22%2F%3E%3Cpath%20fill%3D%22%232d3748%22%20d%3D%22M125.9%20159.7L63.4%2097.2c-3.1-3.1-8.2-3.1-11.3%200L20%20129.3c-3.1%203.1-3.1%208.2%200%2011.3l62.5%2062.5c3.1%203.1%208.2%203.1%2011.3%200l62.5-62.5c3.1-3.1%203.1-8.2%200-11.3l-32.1-32.1c-3.1-3.1-8.2-3.1-11.3%200z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.875rem center;
+            background-size: 0.65em auto;
+            padding-right: 2.5rem;
+        }
+
+        .custom-fixed-plugin .dropdown-menu select.form-control option {
+            color: #2d3748 !important;
+            background: white !important;
+        }
+
+        .custom-fixed-plugin .dropdown-menu select.form-control:disabled {
+            color: #2d3748 !important;
+        }
+
+        #statusSelect {
+            min-width: 100% !important;
+            width: 100% !important;
+            height: 3.5rem !important;
+            font-size: 1.1rem !important;
+        }
+
+        .custom-fixed-plugin .dropdown-menu .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            outline: none;
+            color: #2d3748;
+        }
+
+        .custom-fixed-plugin .dropdown-menu .form-control::placeholder {
+            color: #a0aec0;
+        }
+
+        .custom-fixed-plugin .dropdown-menu label {
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 0.5rem;
+            display: block;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .custom-fixed-plugin .dropdown-menu button {
+            padding: 1rem 2rem;
+            font-size: 0.95rem;
+            border-radius: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            width: 100%;
+            margin-bottom: 0.75rem;
+        }
+
+        .custom-fixed-plugin .dropdown-menu button:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        /* Close button for the panel */
+        .close-filter-panel {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50%;
+            width: 2rem;
+            height: 2rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            z-index: 10001;
+        }
+
+        .close-filter-panel:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            transform: rotate(90deg) scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        /* Overlay when panel is open */
+        .filter-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9998;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .filter-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Estilos para Select2 */
+        .select2-container--default .select2-selection--multiple,
+        .select2-container--default .select2-selection--single {
+            background-color: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #2d3748;
+            padding-left: 0.875rem;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: #a0aec0;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            border-color: #2d3748 transparent transparent transparent;
+            height: 26px;
+            right: 0.875rem;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 1rem;
+            padding: 0.3rem 0.8rem;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: white;
+        }
+        /* Estilos para los resultados de Select2 */
+        .select2-container--default .select2-results__option {
+            background-color: white;
+            color: #2d3748;
+            padding: 0.75rem;
+        }
+
+        .select2-container--default .select2-results__option[aria-selected=true] {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
+{% endblock stylesheets %}
+
+{% block content %}
+    <div class="content">
+        <h1>📚 Catálogo de Mangas</h1>
+
+        <!-- Filtro flotante -->
+        <div class="custom-fixed-plugin">
+            <button id="customFixedPluginButton" class="dropdown-toggle" type="button">Filtros ⚙️</button>
+
+            <div id="filterPanel" class="dropdown-menu" aria-hidden="false">
+                <button class="close-filter-panel" id="closeFilterPanel" title="Cerrar">×</button>
+                <ul>
+                    <li class="header-title">Filtros</li>
+                    <li class="adjustments-line">
+                        <label for="titleInput">Título</label>
+                        <input id="titleInput" class="form-control" type="text" placeholder="Título...">
+                    </li>
+                    <li class="adjustments-line">
+                        <label for="genreSelect">Géneros</label>
+                        <select id="genreSelect" class="form-control" multiple>
+                            <option value="">--</option>
+                            {% for g in genres %}
+                                <option value="{{ g }}">{{ g }}</option>
+                            {% endfor %}
+                        </select>
+                    </li>
+                    <li class="adjustments-line">
+                        <label for="authorInput">Autor</label>
+                        <input id="authorInput" class="form-control" type="text" placeholder="Autor...">
+                    </li>
+                    <li class="adjustments-line">
+                        <label>Año</label>
+                        <div style="display:flex;gap:0.5rem">
+                            <input id="startYear" class="form-control" type="number" placeholder="Desde">
+                            <input id="endYear" class="form-control" type="number" placeholder="Hasta">
+                        </div>
+                    </li>
+                    <li class="adjustments-line">
+                        <label for="statusSelect">Estado</label>
+                        <select id="statusSelect" class="form-control">
+                            <option value="">Cualquiera</option>
+                            <option value="ongoing">En curso</option>
+                            <option value="completed">Completado</option>
+                            <option value="hiatus">Pausado</option>
+                            <option value="cancelled">Cancelado</option>
+                            <option value="unknown">Desconocido</option>
+                        </select>
+                    </li>
+                    <li class="adjustments-line">
+                        <label>Capítulos</label>
+                        <div style="display:flex;gap:0.5rem">
+                            <input id="minChapters" class="form-control" type="number" placeholder="Mín">
+                            <input id="maxChapters" class="form-control" type="number" placeholder="Máx">
+                        </div>
+                    </li>
+                    <li class="button-container">
+                        <button onclick="applyFilters()">Aplicar filtros</button>
+                        <button onclick="clearFilters()" style="background:#e2e8f0;color:#2d3748;margin-top:0.5rem;">Limpiar</button>
+                    </li>
+                </ul>
+            </div>
+            <div id="filterOverlay" class="filter-overlay"></div>
+        </div>
+
+        <!-- Active Filters Display -->
+        <div class="active-filters" id="activeFilters"></div>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div style="text-align: center;">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Aplicando filtros...</div>
+            </div>
+        </div>
+
+        <div class="manga-container">
+            {% for manga in mangas %}
+                {% include "manga/manga_card.html" with manga=manga %}
+            {% endfor %}
+            {% if mangas|length == 0 %}
+                <div class="no-results">
+                    <div class="no-results-icon">📭</div>
+                    <p>No se encontraron mangas con los filtros seleccionados.</p>
+                    <p style="font-size: 0.9rem; opacity: 0.8;">Intenta ajustar tus filtros o limpiarlos para ver todos los mangas.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="pagination">
+            <div>
+                <span>Página {{ mangas.number }} de {{ mangas.paginator.num_pages }}</span>
+            </div>
+            <div>
+                {% if mangas.has_previous %}
+                    <a href="?page=1{% if current_filters.title %}&title={{ current_filters.title }}{% endif %}{% for genre in current_filters.genres %}&genre={{ genre }}{% endfor %}{% if current_filters.author %}&author={{ current_filters.author }}{% endif %}{% if current_filters.start_year %}&start_year={{ current_filters.start_year }}{% endif %}{% if current_filters.end_year %}&end_year={{ current_filters.end_year }}{% endif %}{% if current_filters.status %}&status={{ current_filters.status }}{% endif %}{% if current_filters.min_chapters %}&min_chapters={{ current_filters.min_chapters }}{% endif %}{% if current_filters.max_chapters %}&max_chapters={{ current_filters.max_chapters }}{% endif %}">⏮ Primera</a>
+                    <a href="?page={{ mangas.previous_page_number }}{% if current_filters.title %}&title={{ current_filters.title }}{% endif %}{% for genre in current_filters.genres %}&genre={{ genre }}{% endfor %}{% if current_filters.author %}&author={{ current_filters.author }}{% endif %}{% if current_filters.start_year %}&start_year={{ current_filters.start_year }}{% endif %}{% if current_filters.end_year %}&end_year={{ current_filters.end_year }}{% endif %}{% if current_filters.status %}&status={{ current_filters.status }}{% endif %}{% if current_filters.min_chapters %}&min_chapters={{ current_filters.min_chapters }}{% endif %}{% if current_filters.max_chapters %}&max_chapters={{ current_filters.max_chapters }}{% endif %}">◀ Anterior</a>
+                {% endif %}
+                {% for page_num in mangas.paginator.page_range %}
+                    {% if page_num > mangas.number and page_num <= mangas.number|add:5 %}
+                        <a href="?page={{ page_num }}{% if current_filters.title %}&title={{ current_filters.title }}{% endif %}{% for genre in current_filters.genres %}&genre={{ genre }}{% endfor %}{% if current_filters.author %}&author={{ current_filters.author }}{% endif %}{% if current_filters.start_year %}&start_year={{ current_filters.start_year }}{% endif %}{% if current_filters.end_year %}&end_year={{ current_filters.end_year }}{% endif %}{% if current_filters.status %}&status={{ current_filters.status }}{% endif %}{% if current_filters.min_chapters %}&min_chapters={{ current_filters.min_chapters }}{% endif %}{% if current_filters.max_chapters %}&max_chapters={{ current_filters.max_chapters }}{% endif %}">{{ page_num }}</a>
+                    {% endif %}
+                {% endfor %}
+                {% if mangas.has_next %}
+                    <a href="?page={{ mangas.next_page_number }}{% if current_filters.title %}&title={{ current_filters.title }}{% endif %}{% for genre in current_filters.genres %}&genre={{ genre }}{% endfor %}{% if current_filters.author %}&author={{ current_filters.author }}{% endif %}{% if current_filters.start_year %}&start_year={{ current_filters.start_year }}{% endif %}{% if current_filters.end_year %}&end_year={{ current_filters.end_year }}{% endif %}{% if current_filters.status %}&status={{ current_filters.status }}{% endif %}{% if current_filters.min_chapters %}&min_chapters={{ current_filters.min_chapters }}{% endif %}{% if current_filters.max_chapters %}&max_chapters={{ current_filters.max_chapters }}{% endif %}">Siguiente ▶</a>
+                    <a href="?page={{ mangas.paginator.num_pages }}{% if current_filters.title %}&title={{ current_filters.title }}{% endif %}{% for genre in current_filters.genres %}&genre={{ genre }}{% endfor %}{% if current_filters.author %}&author={{ current_filters.author }}{% endif %}{% if current_filters.start_year %}&start_year={{ current_filters.start_year }}{% endif %}{% if current_filters.end_year %}&end_year={{ current_filters.end_year }}{% endif %}{% if current_filters.status %}&status={{ current_filters.status }}{% endif %}{% if current_filters.min_chapters %}&min_chapters={{ current_filters.min_chapters }}{% endif %}{% if current_filters.max_chapters %}&max_chapters={{ current_filters.max_chapters }}{% endif %}">Última ⏭</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block javascripts %}
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+    <script>
+        function toggleFilterPanel() {
+            $('#filterPanel').toggleClass('show');
+            $('#filterOverlay').toggleClass('show');
+        }
+
+        var fixedPluginBtn = document.getElementById('customFixedPluginButton');
+        if (fixedPluginBtn) fixedPluginBtn.addEventListener('click', function (e) { e.stopPropagation(); toggleFilterPanel(); });
+
+        var closeFilterBtn = document.getElementById('closeFilterPanel');
+        if (closeFilterBtn) closeFilterBtn.addEventListener('click', function (e) { e.stopPropagation(); toggleFilterPanel(); });
+
+        // Close panel when clicking outside
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.custom-fixed-plugin').length) {
+                $('#filterPanel').removeClass('show');
+                $('#filterOverlay').removeClass('show');
+            }
+        });
+
+        $('#filterPanel').on('click', function (e) {
+            e.stopPropagation();
+        });
+
+        if (typeof $ !== 'undefined' && $('#genreSelect').length) {
+            $('#genreSelect').select2({
+                placeholder: 'Seleccionar géneros',
+                allowClear: true,
+                dropdownParent: $('#filterPanel'),
+                width: '100%'
+            });
+        }
+
+        function applyFilters() {
+            var title = document.getElementById('titleInput').value;
+            var genres = Array.from(document.getElementById('genreSelect').selectedOptions).map(option => option.value);
+            var author = document.getElementById('authorInput').value;
+            var startYear = document.getElementById('startYear').value;
+            var endYear = document.getElementById('endYear').value;
+            var status = document.getElementById('statusSelect').value;
+            var minChapters = document.getElementById('minChapters').value;
+            var maxChapters = document.getElementById('maxChapters').value;
+
+            // Validate year range
+            if (startYear && endYear && parseInt(startYear) > parseInt(endYear)) {
+                alert('El año de inicio no puede ser mayor al año de fin');
+                return;
+            }
+
+            // Validate chapter range
+            if (minChapters && maxChapters && parseInt(minChapters) > parseInt(maxChapters)) {
+                alert('El número mínimo de capítulos no puede ser mayor al máximo');
+                return;
+            }
+
+            // Show loading indicator
+            document.getElementById('loadingOverlay').style.display = 'flex';
+
+            // Build URL with proper query parameters and reset to page 1
+            var url = new URL(window.location.origin + window.location.pathname);
+            url.searchParams.set('page', 1);
+            if (title) url.searchParams.set('title', title);
+            genres.forEach(function(genre) {
+                url.searchParams.append('genre', genre);
+            });
+            if (author) url.searchParams.set('author', author);
+            if (startYear) url.searchParams.set('start_year', startYear);
+            if (endYear) url.searchParams.set('end_year', endYear);
+            if (status) url.searchParams.set('status', status);
+            if (minChapters) url.searchParams.set('min_chapters', minChapters);
+            if (maxChapters) url.searchParams.set('max_chapters', maxChapters);
+
+            window.location.href = url.toString();
+        }
+
+        function clearFilters() {
+            // Navigate to the same path without querystring
+            window.location.href = window.location.pathname;
+        }
+
+        function removeFilter(filterType, filterValue) {
+            var url = new URL(window.location.href);
+            if (filterType === 'genre') {
+                var genres = url.searchParams.getAll('genre');
+                genres = genres.filter(function(g) { return g !== filterValue; });
+                url.searchParams.delete('genre');
+                genres.forEach(function(g) { url.searchParams.append('genre', g); });
+            } else {
+                url.searchParams.delete(filterType);
+            }
+            url.searchParams.set('page', 1);
+            window.location.href = url.toString();
+        }
+
+        function displayActiveFilters() {
+            var urlParams = new URLSearchParams(window.location.search);
+            var activeFiltersDiv = document.getElementById('activeFilters');
+            activeFiltersDiv.innerHTML = '';
+
+            var title = urlParams.get('title');
+            if (title) {
+                activeFiltersDiv.innerHTML += '<div class="filter-tag">📝 Título: ' + title + '<span class="remove-filter" onclick="removeFilter(\'title\', \'' + title + '\')">&times;</span></div>';
+            }
+
+            var genres = urlParams.getAll('genre');
+            genres.forEach(function(genre) {
+                activeFiltersDiv.innerHTML += '<div class="filter-tag">🎭 ' + genre + '<span class="remove-filter" onclick="removeFilter(\'genre\', \'' + genre + '\')">&times;</span></div>';
+            });
+
+            var author = urlParams.get('author');
+            if (author) {
+                activeFiltersDiv.innerHTML += '<div class="filter-tag">✍️ Autor: ' + author + '<span class="remove-filter" onclick="removeFilter(\'author\', \'' + author + '\')">&times;</span></div>';
+            }
+
+            var startYear = urlParams.get('start_year');
+            var endYear = urlParams.get('end_year');
+            if (startYear || endYear) {
+                var yearLabel = '📅 ';
+                if (startYear && endYear) {
+                    yearLabel += startYear + ' - ' + endYear;
+                } else if (startYear) {
+                    yearLabel += 'Desde ' + startYear;
+                } else {
+                    yearLabel += 'Hasta ' + endYear;
+                }
+                activeFiltersDiv.innerHTML += '<div class="filter-tag">' + yearLabel + '<span class="remove-filter" onclick="removeFilter(\'start_year\', \'\'); removeFilter(\'end_year\', \'\')">&times;</span></div>';
+            }
+
+            var status = urlParams.get('status');
+            if (status) {
+                var statusLabels = {
+                    'ongoing': 'En curso',
+                    'completed': 'Completado',
+                    'hiatus': 'Pausado',
+                    'cancelled': 'Cancelado',
+                    'unknown': 'Desconocido'
+                };
+                activeFiltersDiv.innerHTML += '<div class="filter-tag">📊 Estado: ' + (statusLabels[status] || status) + '<span class="remove-filter" onclick="removeFilter(\'status\', \'\')">&times;</span></div>';
+            }
+
+            var minChapters = urlParams.get('min_chapters');
+            var maxChapters = urlParams.get('max_chapters');
+            if (minChapters || maxChapters) {
+                var chapterLabel = '📖 ';
+                if (minChapters && maxChapters) {
+                    chapterLabel += minChapters + ' - ' + maxChapters + ' caps';
+                } else if (minChapters) {
+                    chapterLabel += 'Mín ' + minChapters + ' caps';
+                } else {
+                    chapterLabel += 'Máx ' + maxChapters + ' caps';
+                }
+                activeFiltersDiv.innerHTML += '<div class="filter-tag">' + chapterLabel + '<span class="remove-filter" onclick="removeFilter(\'min_chapters\', \'\'); removeFilter(\'max_chapters\', \'\')">&times;</span></div>';
+            }
+        }
+
+        // Initialize filter inputs from URL parameters
+        function initializeFilters() {
+            var urlParams = new URLSearchParams(window.location.search);
+
+            var title = urlParams.get('title');
+            if (title) document.getElementById('titleInput').value = title;
+
+            var genres = urlParams.getAll('genre');
+            $('#genreSelect').val(genres).trigger('change');
+
+            var author = urlParams.get('author');
+            if (author) document.getElementById('authorInput').value = author;
+
+            var startYear = urlParams.get('start_year');
+            if (startYear) document.getElementById('startYear').value = startYear;
+
+            var endYear = urlParams.get('end_year');
+            if (endYear) document.getElementById('endYear').value = endYear;
+
+            var status = urlParams.get('status');
+            if (status) document.getElementById('statusSelect').value = status;
+
+            var minChapters = urlParams.get('min_chapters');
+            if (minChapters) document.getElementById('minChapters').value = minChapters;
+
+            var maxChapters = urlParams.get('max_chapters');
+            if (maxChapters) document.getElementById('maxChapters').value = maxChapters;
+
+            displayActiveFilters();
+        }
+
+        // Call initializeFilters when page loads
+        $(document).ready(function() {
+            initializeFilters();
+        });
+    </script>
+{% endblock javascripts %}
+
+
+
+
+
+
+
+
+

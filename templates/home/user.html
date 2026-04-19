@@ -1,0 +1,252 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} User Profile {% endblock %}
+
+{% block stylesheets %}
+    {{ block.super }}
+    <style>
+        .errorlist {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .error-item {
+            color: red;
+            margin-bottom: 5px;
+        }
+
+        .profile-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #667eea;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .profile-placeholder {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0 auto 0.5rem auto;
+            border: 3px solid #667eea;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .profile-picture-section {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .profile-picture-section label {
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+            display: block;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 0.8rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.2rem;
+            font-size: 0.85rem;
+        }
+
+        .card-header {
+            background: #667eea;
+            color: white;
+        }
+
+        .card-header .title {
+            color: white;
+            margin: 0;
+        }
+    </style>
+{% endblock stylesheets %}
+
+{% block content %}
+    <div class="content">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="title">Edit Profile</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="{% url 'edit' %}" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <h6 class="card-category">
+                                {% if msg %}
+                                    <span class="text-danger">{{ msg | safe }}</span>
+                                {% endif %}
+                            </h6>
+                            
+                            <div class="profile-picture-section">
+                                {% if profile.profile_picture and profile.profile_picture.name %}
+                                    <img src="/media/{{ profile.profile_picture.name }}" alt="Profile Picture" class="profile-preview">
+                                {% else %}
+                                    <div class="profile-placeholder">
+                                        {{ user.username|first|upper }}
+                                    </div>
+                                {% endif %}
+                                <div class="form-group">
+                                    <label for="{{ form.profile_picture.id_for_label }}">Profile Picture</label>
+                                    <input type="file" class="form-control" name="profile_picture" accept="image/*">
+                                    {% if form.profile_picture.errors %}
+                                        <ul class="errorlist">
+                                            {% for error in form.profile_picture.errors %}
+                                                <li class="error-item">{{ error }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-3 px-md-1">
+                                    <div class="form-group">
+                                        <label for="{{ form.username.id_for_label }}">Username</label>
+                                        <input type="text" class="form-control" placeholder="Username" name="username" value="{{ user.username }}">
+                                        {% if form.username.errors %}
+                                            <ul class="errorlist">
+                                                {% for error in form.username.errors %}
+                                                    <li class="error-item">{{ error }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-4 pl-md-1">
+                                    <div class="form-group">
+                                        <label for="{{ form.email.id_for_label }}">Email address</label>
+                                        <input type="email" class="form-control" placeholder="Email" name="email" value="{{ user.email }}">
+                                        {% if form.email.errors %}
+                                            <ul class="errorlist">
+                                                {% for error in form.email.errors %}
+                                                    <li class="error-item">{{ error }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 pr-md-1">
+                                    <div class="form-group">
+                                        <label for="{{ form.first_name.id_for_label }}">First Name</label>
+                                        <input type="text" class="form-control" placeholder="First Name" name="first_name" value="{{ user.first_name }}">
+                                        {% if form.first_name.errors %}
+                                            <ul class="errorlist">
+                                                {% for error in form.first_name.errors %}
+                                                    <li class="error-item">{{ error }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 pl-md-1">
+                                    <div class="form-group">
+                                        <label for="{{ form.last_name.id_for_label }}">Last Name</label>
+                                        <input type="text" class="form-control" placeholder="Last Name" name="last_name" value="{{ user.last_name }}">
+                                        {% if form.last_name.errors %}
+                                            <ul class="errorlist">
+                                                {% for error in form.last_name.errors %}
+                                                    <li class="error-item">{{ error }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 pr-md-1">
+                                    <div class="form-group">
+                                        <label for="{{ form.location.id_for_label }}">Location</label>
+                                        <input type="text" class="form-control" placeholder="Location" name="location" value="{% if profile %}{{ profile.location }}{% endif %}">
+                                        {% if form.location.errors %}
+                                            <ul class="errorlist">
+                                                {% for error in form.location.errors %}
+                                                    <li class="error-item">{{ error }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 pl-md-1">
+                                    <div class="form-group">
+                                        <label for="{{ form.website.id_for_label }}">Website</label>
+                                        <input type="url" class="form-control" placeholder="Website" name="website" value="{% if profile %}{{ profile.website }}{% endif %}">
+                                        {% if form.website.errors %}
+                                            <ul class="errorlist">
+                                                {% for error in form.website.errors %}
+                                                    <li class="error-item">{{ error }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 pr-md-1">
+                                    <div class="form-group">
+                                        <label for="{{ form.birth_date.id_for_label }}">Birth Date</label>
+                                        <input type="date" class="form-control" name="birth_date" value="{% if profile and profile.birth_date %}{{ profile.birth_date|date:'Y-m-d' }}{% endif %}">
+                                        {% if form.birth_date.errors %}
+                                            <ul class="errorlist">
+                                                {% for error in form.birth_date.errors %}
+                                                    <li class="error-item">{{ error }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="{{ form.bio.id_for_label }}">Bio</label>
+                                        <textarea class="form-control" name="bio" rows="3" maxlength="500" placeholder="Tell us about yourself...">{% if profile %}{{ profile.bio }}{% endif %}</textarea>
+                                        {% if form.bio.errors %}
+                                            <ul class="errorlist">
+                                                {% for error in form.bio.errors %}
+                                                    <li class="error-item">{{ error }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-fill btn-primary">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block javascripts %}
+    {{ block.super }}
+    {# Add your specific JavaScript code here if needed #}
+{% endblock javascripts %}
+

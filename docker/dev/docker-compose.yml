@@ -1,0 +1,61 @@
+version: '3.8'
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: manga_mysql_dev
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-manga_db}
+      MYSQL_USER: ${MYSQL_USER:-manga_db_usr}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-manga_pass}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_pass}
+    volumes:
+      - mysql_data_dev:/var/lib/mysql
+    networks:
+      - dev_network
+
+  manga-app:
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfile
+    container_name: manga_app_dev
+    env_file: .env
+    command: >
+      sh -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    working_dir: /usr/src/app
+    volumes:
+      - ../../:/usr/src/app
+      - static_volume_dev:/usr/src/app/core/staticfiles
+      - media_volume_dev:/usr/src/app/media
+      - ./.env:/usr/src/app/.env:ro
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mysql
+    networks:
+      - dev_network
+
+  populate-db:
+    build:
+      context: ../../
+      dockerfile: docker/Dockerfile
+    container_name: manga_populate_dev
+    env_file: .env
+    depends_on:
+      - mysql
+    volumes:
+      - ../../:/usr/src/app
+      - static_volume_dev:/usr/src/app/core/staticfiles
+      - media_volume_dev:/usr/src/app/media
+    entrypoint: ["/bin/bash", "-c", "echo 'Waiting for MySQL...' && while ! nc -z mysql 3306; do sleep 0.1; done && echo 'MySQL is up' && python manage.py makemigrations && python manage.py migrate && python manage.py shell -c 'from utils.db_populate import populate_mangas; populate_mangas()'"]
+    networks:
+      - dev_network
+
+volumes:
+  mysql_data_dev:
+  static_volume_dev:
+  media_volume_dev:
+
+networks:
+  dev_network:
+    driver: bridge
+

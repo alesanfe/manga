@@ -1,14 +1,16 @@
 # -*- encoding: utf-8 -*-
 """
-Copyright (c) 2019 - present AppSeed.us
+Copyright (c) 2019 - present Manga Project
 """
-from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login
 # Create your views here.
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
 from django.views import View
 
+# Import centralized logger configuration
+from utils.logger_config import logger
 from .forms import LoginForm, SignUpForm, CustomUserEditionForm
+from .models import UserProfile
 
 
 def login_view(request):
@@ -61,8 +63,29 @@ class EditUserView(View):
     def get(self, request):
         user = request.user
         if user is not None:
+            # Get or create UserProfile
+            profile, created = UserProfile.objects.get_or_create(user=user)
+            
+            logger.info(f"User: {user.username}, Profile created: {created}")
+            logger.info(f"Profile picture: {profile.profile_picture}")
+            logger.info(f"Profile picture name: {profile.profile_picture.name if profile.profile_picture else None}")
+            
+            # Pre-fill form with User data
             form = CustomUserEditionForm(instance=user)
-            return render(request, 'home/user.html',{'form': form, 'user': user})
+            
+            # Pre-fill profile fields
+            if profile.profile_picture:
+                form.fields['profile_picture'].initial = profile.profile_picture
+            if profile.bio:
+                form.fields['bio'].initial = profile.bio
+            if profile.location:
+                form.fields['location'].initial = profile.location
+            if profile.website:
+                form.fields['website'].initial = profile.website
+            if profile.birth_date:
+                form.fields['birth_date'].initial = profile.birth_date
+            
+            return render(request, 'home/user.html', {'form': form, 'user': user, 'profile': profile})
         form = LoginForm(request.POST)
         return render(request, 'accounts/login.html', {'form': form, 'user': user, 'msg': 'Usuario no encontrado', 'success': False})
 
@@ -70,10 +93,30 @@ class EditUserView(View):
 
     def post(self, request):
         user = request.user
-        form = CustomUserEditionForm(request.POST, instance=user)
-        user = form.instance
+        form = CustomUserEditionForm(request.POST, request.FILES, instance=user)
+        
         if form.is_valid():
-            print("Fufa POST")
-            form.save()
+            # Save User fields
+            user = form.save()
+            
+            # Get or create UserProfile
+            profile, created = UserProfile.objects.get_or_create(user=user)
+            
+            # Update UserProfile fields
+            if 'profile_picture' in request.FILES:
+                profile.profile_picture = request.FILES['profile_picture']
+            if 'bio' in form.cleaned_data:
+                profile.bio = form.cleaned_data['bio']
+            if 'location' in form.cleaned_data:
+                profile.location = form.cleaned_data['location']
+            if 'website' in form.cleaned_data:
+                profile.website = form.cleaned_data['website']
+            if 'birth_date' in form.cleaned_data:
+                profile.birth_date = form.cleaned_data['birth_date']
+            
+            profile.save()
+            logger.info(f"User {user.username} updated successfully")
             return redirect("/")
-        return render(request, 'home/user.html', {'form': form, 'user': user, 'msg': 'Usuario no editado', 'success': False})
+        
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+        return render(request, 'home/user.html', {'form': form, 'user': user, 'profile': profile, 'msg': 'Usuario no editado', 'success': False})

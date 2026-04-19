@@ -29,3 +29,20 @@ apps/static/assets/node_modules
 apps/static/assets/yarn.lock
 apps/static/assets/.temp
 
+
+# environment files
+.env
+.env.*
+
+# IDEs
+.idea/
+.vscode/
+.qodo/
+
+# Node modules
+node_modules/
+
+# Docker artifacts
+*.tar
+
+

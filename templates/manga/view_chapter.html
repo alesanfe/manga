@@ -1,0 +1,173 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} {{ manga }} - {{ chapter }} {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<style>
+    .manga-reader {
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 20px;
+        transition: all 0.3s ease;
+    }
+    .manga-reader img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+    }
+    .chapter-header {
+        text-align: center;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+    }
+    .back-button {
+        margin-bottom: 20px;
+    }
+    .fullscreen-button {
+        margin-bottom: 20px;
+    }
+    .manga-reader.fullscreen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        background: #000;
+        z-index: 9999;
+        overflow-y: auto;
+    }
+    .manga-reader.fullscreen img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+    }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+
+  <div class="content">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-body">
+            <div class="back-button">
+                <a href="{% url 'list_all_chapters' manga %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver a la lista de capítulos
+                </a>
+                <button id="fullscreenBtn" class="btn btn-primary" onclick="toggleFullscreen()">
+                    <i class="fas fa-expand"></i> Pantalla completa
+                </button>
+            </div>
+
+            {% if error %}
+                <div class="alert alert-danger" role="alert">
+                    <h4 class="alert-heading">Error</h4>
+                    <p>{{ error }}</p>
+                </div>
+            {% else %}
+                <div class="chapter-header">
+                    <h2>{{ manga }} - {{ chapter }}</h2>
+                </div>
+
+                <div class="navigation-buttons" style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                    {% if previous_chapter %}
+                        <a href="{% url 'view_chapter' manga previous_chapter %}" class="btn btn-info">
+                            <i class="fas fa-arrow-left"></i> Capítulo Anterior
+                        </a>
+                    {% else %}
+                        <div></div>
+                    {% endif %}
+                    {% if next_chapter %}
+                        <a href="{% url 'view_chapter' manga next_chapter %}" class="btn btn-info">
+                            Capítulo Siguiente <i class="fas fa-arrow-right"></i>
+                        </a>
+                    {% else %}
+                        <div></div>
+                    {% endif %}
+                </div>
+
+                <div class="manga-reader" id="mangaReader">
+                    {% for image in images %}
+                        <img src="{{ image }}" alt="Page {{ forloop.counter }}" loading="lazy">
+                    {% empty %}
+                        <div class="alert alert-warning" role="alert">
+                            No se encontraron imágenes para este capítulo.
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script>
+function toggleFullscreen() {
+    const reader = document.getElementById('mangaReader');
+    const btn = document.getElementById('fullscreenBtn');
+
+    if (!document.fullscreenElement) {
+        reader.classList.add('fullscreen');
+        if (reader.requestFullscreen) {
+            reader.requestFullscreen();
+        } else if (reader.webkitRequestFullscreen) {
+            reader.webkitRequestFullscreen();
+        } else if (reader.msRequestFullscreen) {
+            reader.msRequestFullscreen();
+        }
+        btn.innerHTML = '<i class="fas fa-compress"></i> Salir de pantalla completa';
+    } else {
+        reader.classList.remove('fullscreen');
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        }
+        btn.innerHTML = '<i class="fas fa-expand"></i> Pantalla completa';
+    }
+}
+
+// Handle fullscreen change events
+document.addEventListener('fullscreenchange', function() {
+    const reader = document.getElementById('mangaReader');
+    const btn = document.getElementById('fullscreenBtn');
+    if (!document.fullscreenElement) {
+        reader.classList.remove('fullscreen');
+        btn.innerHTML = '<i class="fas fa-expand"></i> Pantalla completa';
+    }
+});
+
+document.addEventListener('webkitfullscreenchange', function() {
+    const reader = document.getElementById('mangaReader');
+    const btn = document.getElementById('fullscreenBtn');
+    if (!document.webkitFullscreenElement) {
+        reader.classList.remove('fullscreen');
+        btn.innerHTML = '<i class="fas fa-expand"></i> Pantalla completa';
+    }
+});
+
+document.addEventListener('msfullscreenchange', function() {
+    const reader = document.getElementById('mangaReader');
+    const btn = document.getElementById('fullscreenBtn');
+    if (!document.msFullscreenElement) {
+        reader.classList.remove('fullscreen');
+        btn.innerHTML = '<i class="fas fa-expand"></i> Pantalla completa';
+    }
+});
+</script>
+{% endblock javascripts %}
